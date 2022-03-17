@@ -14,18 +14,18 @@ module MEM_WB(
 
     // to register file
     output reg writeEnableOut,
-    output reg [`RegAddrSize] writeBackAddrIOut,
+    output reg [`RegAddrSize] writeBackAddrOut,
     output reg [`DataSize] dataToReg
 );
 
 always @(posedge clk) begin
     writeEnableOut <= writeEnableIn;
     if (resetIn) begin
-        dataToReg <= `DataBusReset;
-        writeBackAddrIOut <= `RegAddrReset;
+        dataToReg <= `DataBusReset;;
+        writeBackAddrOut <= `RegAddrReset;
     end
     else begin
-        writeBackAddrIOut <= writeBackAddrIn;
+        writeBackAddrOut <= writeBackAddrIn;
         if(select) begin 
             dataToReg <= dataFromALU;
         end 

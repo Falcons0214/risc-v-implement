@@ -12,7 +12,7 @@ module decoder(
     
     // to Dec_ALU
     output reg resetOut,
-    output reg writeEnable,
+    output reg regWriteEnable,
     output reg [`OpcodeSize] ALUopcode,
     output reg [`Func3Size] ALUFunc3,
     output reg [`Func7Size] ALUFunc7,
@@ -33,7 +33,7 @@ always @(*) begin
         resetOut <= 1'b1;
         readAddr1 <= `RegAddrReset;
         readAddr2 <= `RegAddrReset;
-        writeEnable <= `RegWriteDeny;
+        regWriteEnable <= `RegWriteDeny;
         writeAddr <= `RegAddrReset;
         ALUopcode <= `NOP;
         ALUFunc3 <= func3;
@@ -48,7 +48,7 @@ always @(*) begin
                     `ORI: begin
                         readAddr1 <= rs1;
                         readAddr2 <= `RegAddrReset;
-                        writeEnable <= `RegWriteAccept;
+                        regWriteEnable <= `RegWriteAccept;
                         writeAddr <= rd;
                         ALUopcode <= opCode;
                         ALUFunc3 <= func3;
@@ -58,7 +58,7 @@ always @(*) begin
                     default: begin
                         readAddr1 <= `RegAddrReset;
                         readAddr2 <= `RegAddrReset;
-                        writeEnable <= `RegWriteDeny;
+                        regWriteEnable <= `RegWriteDeny;
                         writeAddr <= `RegAddrReset;
                         ALUopcode <= `NOP;
                         ALUFunc3 <= func3;
@@ -70,7 +70,7 @@ always @(*) begin
             default: begin
                 readAddr1 <= `RegAddrReset;
                 readAddr2 <= `RegAddrReset;
-                writeEnable <= `RegWriteDeny;
+                regWriteEnable <= `RegWriteDeny;
                 writeAddr <= `RegAddrReset;
                 ALUopcode <= `NOP;
                 ALUFunc3 <= func3;

@@ -21,7 +21,7 @@ module ALU_MEM(
 );
 
 always @(posedge clk) begin
-    writeEnableOut <= writeBackAddrIn;
+    writeEnableOut <= writeEnableIn;
     if(resetIn) begin
         resetOut <= 1'b1;
         dataOut <= `DataBusReset;

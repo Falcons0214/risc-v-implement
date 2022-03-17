@@ -47,7 +47,7 @@ always @(*) begin
     end
     else begin
         resetOut <= 1'b0;
-        case (opcode)
+        case (opcode) // ? 
             `Opcode_Type_I: begin
                 case (opFunc3)
                     `ORI: begin

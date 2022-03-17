@@ -8,7 +8,7 @@ module register(
     input wire [`RegAddrSize]writeAddr,
     
     // from WB
-    input wire writeEnable, 
+    input wire writeEnable,
     input wire [`DataSize]writeDate,
     
     // to Dec_ALU
@@ -28,7 +28,6 @@ always @(*) begin
     else begin
         resetOut <= 1'b0;
         if (writeEnable) begin
-            $display("????");
             regs[writeAddr] <= writeDate;
         end
         else begin

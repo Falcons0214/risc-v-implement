@@ -82,7 +82,7 @@ wire [`DataSize] tmpDataFromRam;
 initial begin
 $readmemb("./data", rom1.rom);
 $readmemb("./data2", regF1.regs);
-$monitor("time %4d, clock: %b, reset: %b, pcAddrOut: %b, romdataout: %b\ndecoder data1: %b, decoder data2: %b, decoder opcode: %b, decoder func3: %b\nreg file dataOut1: %b\nDEC_ALU data1: %b\nALU data: %b immValue: %b\nALU_MEM data: %b\nwrite back data: %b, addr: %b\n", $stime, clk, pcResetIn, pcAddrOut, romDataOut, DecRead1, DecRead2, DecALUopcode, DecALUFunc3, RegOutData1, ALUData1, ALUoutData, ALUimmValue, aluMemData, writeBackData, writeBackAddr);
+$monitor("time %4d, clock: %b, reset: %b, pcAddrOut: %b, romdataout: %b\ndecoder data1: %b, decoder data2: %b, decoder opcode: %b, decoder func3: %b\nreg file dataOut1: %b\nDEC_ALU data1: %b\nALU data: %b immValue: %b\nALU_MEM data: %b\nwrite back data: %b, addr: %b, enable: %b\nResult: %b", $stime, clk, pcResetIn, pcAddrOut, romDataOut, DecRead1, DecRead2, DecALUopcode, DecALUFunc3, RegOutData1, ALUData1, ALUoutData, ALUimmValue, aluMemData, writeBackData, writeBackAddr, wbEnable, regF1.regs[5'b00000]);
 
 clk = 0;
 pcResetIn = 1;
@@ -95,7 +95,7 @@ flush = 0;
 #10
 pcResetIn = 0;
 
-#110 $finish; 
+#90 $finish; 
 end
 
 always begin
@@ -145,7 +145,7 @@ decoder dec1(
     .readAddr2(DecRead2),
     .writeAddr(DecWrite),
     .resetOut(DecReset),
-    .writeEnable(DecWriteEnable),
+    .regWriteEnable(DecWriteEnable),
     .ALUopcode(DecALUopcode),
     .ALUFunc3(DecALUFunc3),
     .ALUFunc7(DecALUFunc7),
@@ -236,7 +236,7 @@ MEM_WB MEM_WB1(
     .writeBackAddrIn(aluMemWriteBackAddrOut),
     // out
     .writeEnableOut(wbEnable),
-    .writeBackAddrIOut(writeBackAddr),
+    .writeBackAddrOut(writeBackAddr),
     .dataToReg(writeBackData)
 );
 

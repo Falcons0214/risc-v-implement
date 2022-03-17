@@ -3,7 +3,7 @@
 `define Func7Size 6:0
 `define OpcodeSize 6:0
 
-// data 
+// data bus size
 `define DataSize 31:0
 
 // register file 
@@ -14,8 +14,12 @@
 
 // rom
 `define RomUnitSize 31:0
-`define RomSize 31:0
+`define RomSize 63:0
 `define RomAddr 5:0 
+
+// ram
+`define RamUnitSize 31:0
+`define RamSize 63:0
 
 // init value
 `define RegAddrReset 5'b0
@@ -29,9 +33,8 @@
 `define ORI 3'b110
 
 // ALU control
-`define ALUopReset 3'b0
 `define ALUControlBus 2:0
-
+`define ALUopReset 3'b0
 `define ALUop_OR 3'b110
 
 // ALU 

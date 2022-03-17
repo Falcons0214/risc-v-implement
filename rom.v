@@ -11,7 +11,7 @@ module rom(
     output reg [`DataSize]inst
 );
 
-reg [`RomUnitSize] rom[63:0]; // 64 unit, per unit 32 bits 
+reg [`RomUnitSize] rom[`RomSize]; // 64 unit, per unit 32 bits 
 
 always @(*) begin
     if (flush) begin

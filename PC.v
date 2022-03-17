@@ -10,7 +10,7 @@ module PC(
     
     // to rom
     output reg resetOut,
-    output reg [`RomAddr] addrOut 
+    output reg [`RomAddr] addrOut // Q1 & is reset need? 
 );
 
 always @(posedge clk) begin

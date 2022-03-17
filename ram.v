@@ -9,7 +9,7 @@ module ram(
     output wire [`DataSize] dataRead,
 );
 
-reg [`MemSize] ram[63:0];
+reg [`RamUnitSize] ram[`RamSize];
 
 always @(*) begin
 

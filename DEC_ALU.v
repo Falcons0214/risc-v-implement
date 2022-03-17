@@ -44,7 +44,7 @@ always @(posedge clk)begin
     end
     else begin
         resetOut <= 1'b0;
-        writeEnableAlu <= `RegWriteAccept;
+        writeEnableAlu <= writeEnableReg;
         writeBackAddrOut <= writeBackAddrIn;
         dataAlu1 <= dataReg1;
         dataAlu2 <= dataReg2;
