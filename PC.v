@@ -6,20 +6,17 @@ module PC(
     input wire enable, 
     input wire select, // 1: jump, 0: next
     input wire [`RomAddr] addrIn,
-    input wire [`RomAddr] addrJump,
+    input wire [`RomAddr] addrJump, 
     
     // to rom
-    output reg resetOut,
-    output reg [`RomAddr] addrOut // Q1 & is reset need? 
+    output reg [`RomAddr] addrOut
 );
 
 always @(posedge clk) begin
     if (resetIn) begin
         addrOut <= `RomAddrReset;
-        resetOut <= 1'b1;
     end
     else begin
-        resetOut <= 1'b0;
         if (enable) begin
             if (select) begin
                 addrOut <= addrJump;

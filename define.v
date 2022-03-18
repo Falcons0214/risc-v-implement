@@ -27,14 +27,24 @@
 `define DataBusReset 32'b0
 
 // Instruction opcode type
-`define Opcode_Type_I 7'b0010011
+`define Opcode_Type_I_Imm 7'b0010011
+`define Opcode_Type_I_Load 7'b0000011
 
-// I_Type instruction
+// I_Type immediate instruction
 `define ORI 3'b110
+
+// I_Type Load instruction
+`define LH 3'b001
+`define LW 3'b010
+
+// R_Type Store instruction
+`define SW 3'b010
 
 // ALU control
 `define ALUControlBus 2:0
 `define ALUopReset 3'b0
+
+`define ALUop_ADD 3'b001
 `define ALUop_OR 3'b110
 
 // ALU 

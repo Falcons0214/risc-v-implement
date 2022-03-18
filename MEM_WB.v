@@ -2,8 +2,6 @@
 
 module MEM_WB(
     input wire clk,
-    input wire resetIn,
-
     input wire select,
     input wire [`DataSize]dataFromALU, 
     input wire [`DataSize]dataFromRam,
@@ -20,19 +18,13 @@ module MEM_WB(
 
 always @(posedge clk) begin
     writeEnableOut <= writeEnableIn;
-    if (resetIn) begin
-        dataToReg <= `DataBusReset;;
-        writeBackAddrOut <= `RegAddrReset;
-    end
-    else begin
-        writeBackAddrOut <= writeBackAddrIn;
-        if(select) begin 
-            dataToReg <= dataFromALU;
-        end 
-        else begin
-            dataToReg <= dataFromRam;
-        end
+    writeBackAddrOut <= writeBackAddrIn;
+    if(select) begin 
+        dataToReg <= dataFromALU;
     end 
+    else begin
+        dataToReg <= dataFromRam;
+    end
 end
 
 endmodule

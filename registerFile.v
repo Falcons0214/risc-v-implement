@@ -2,17 +2,15 @@
 
 module register(
     // from decoder
-    input wire resetIn,
-    input wire [`RegAddrSize]readAddrF,
-    input wire [`RegAddrSize]readAddrS,
-    input wire [`RegAddrSize]writeAddr,
+    input wire [`RegAddrSize]readAddrF, // rs1
+    input wire [`RegAddrSize]readAddrS, // rs2
+    input wire [`RegAddrSize]writeAddr, // rd
     
     // from WB
     input wire writeEnable,
     input wire [`DataSize]writeDate,
     
     // to Dec_ALU
-    output reg resetOut,
     output reg [`DataSize]outDataF,
     output reg [`DataSize]outDataS
 );
@@ -20,22 +18,14 @@ module register(
 reg [`DataSize] regs[`RegFileSize];
 
 always @(*) begin
-    if (resetIn) begin
-        resetOut <= 1'b1;
-        outDataF <= `DataBusReset;
-        outDataS <= `DataBusReset;
+    if (writeEnable) begin
+        regs[writeAddr] <= writeDate;
     end
     else begin
-        resetOut <= 1'b0;
-        if (writeEnable) begin
-            regs[writeAddr] <= writeDate;
-        end
-        else begin
-            regs[writeAddr] <= regs[writeAddr];
-        end
-        outDataF <= regs[readAddrF];
-        outDataS <= regs[readAddrS];
+        regs[writeAddr] <= regs[writeAddr];
     end
+    outDataF <= regs[readAddrF];
+    outDataS <= regs[readAddrS];
 end
 
 endmodule
