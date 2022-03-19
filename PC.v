@@ -22,7 +22,7 @@ always @(posedge clk) begin
                 addrOut <= addrJump;
             end
             else begin
-                addrOut <= addrOut + 3'b101;
+                addrOut <= addrOut + 3'b010; // test
             end
         end
         else begin

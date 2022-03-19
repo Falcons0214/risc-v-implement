@@ -14,11 +14,13 @@ module DEC_ALU(
     input wire [`ALUControlBus] ALUop,
     input wire writeEnableReg,
     input wire dataCacheReadEnableIn,
+    input wire dataCacheWriteEnableIn,
     input wire [`DataSize] immValueIn,
 
     // to ALU_MEM
     output reg writeEnableAlu,
     output reg dataCacheReadEnableOut,
+    output reg dataCacheWriteEnableOut,
     output reg [`RegAddrSize] writeBackAddrOut,
 
     // to ALU
@@ -31,6 +33,7 @@ module DEC_ALU(
 always @(posedge clk)begin
     writeEnableAlu <= writeEnableReg;
     dataCacheReadEnableOut <= dataCacheReadEnableIn;
+    dataCacheWriteEnableOut <= dataCacheWriteEnableIn;
     writeBackAddrOut <= writeBackAddrIn;
     dataAlu1 <= dataReg1;
     dataAlu2 <= dataReg2;

@@ -22,21 +22,25 @@ wire [4:0] rs1 = inst[19:15];
 wire [`immValueBus] immV = inst[31:20]; // [11:5]: func7 + [4:0]: rs2
 
 always @(*) begin
+    OutOpcode <= opCode;
+    OutFunc3 <= func3;
     if (opCode == `Opcode_Type_I_Imm ||
         opCode == `Opcode_Type_I_Load) begin
-        readAddr1 <= rs1;
+        readAddr1 <= rs1; // base addr
         readAddr2 <= `RegAddrReset;
-        writeAddr <= rd;
-        OutOpcode <= opCode;
-        OutFunc3 <= func3;
-        immValue <= immV;
-    end    
+        writeAddr <= rd; // dest
+        immValue <= immV; // offset
+    end
+    else if (opCode == `Opcode_Type_R_Store) begin
+        readAddr1 <= rs1; // base addr
+        readAddr2 <= inst[24:20]; // rs2, src
+        writeAddr <= `RegAddrReset;
+        immValue <= {inst[31:25], rd[4:0]}; // offset
+    end
     else begin
         readAddr1 <= `RegAddrReset;
         readAddr2 <= `RegAddrReset;
         writeAddr <= `RegAddrReset;
-        OutOpcode <= `NOP;
-        OutFunc3 <= func3;
         immValue <= `ImmReset;
     end
 end 
@@ -52,9 +56,9 @@ module controlUnit(
     // to Dec_ALU
     output reg [`DataSize] immValueOut,
     output reg [`ALUControlBus] ALUop,
+    output reg dataCacheWriteEnable,
     output reg dataCacheReadEnable,
     output reg regWriteEnable
-
 );
 
 always @(*) begin
@@ -70,6 +74,7 @@ always @(*) begin
             endcase
             regWriteEnable <= `RegWriteAccept;
             dataCacheReadEnable <= `DataCacheReadDeny;
+            dataCacheWriteEnable <= `DataCacheWriteDeny;
             immValueOut <= {{20{immValueIn[11]}}, immValueIn[11:0]};
         end
         `Opcode_Type_I_Load: begin
@@ -85,12 +90,29 @@ always @(*) begin
             endcase
             regWriteEnable <= `RegWriteAccept;
             dataCacheReadEnable <= `DataCacheReadAccept;
+            dataCacheWriteEnable <= `DataCacheWriteDeny;
+        end
+        `Opcode_Type_R_Store: begin
+            case (opFunc3) // same as Load
+                `SW: begin // 32bits
+                    ALUop <= `ALUop_ADD;
+                    immValueOut <= {{20{immValueIn[11]}}, immValueIn[11:0]};
+                end
+                default: begin
+                    ALUop <= `ALUopReset;
+                    immValueOut <= immValueIn;
+                end
+            endcase
+            regWriteEnable <= `RegWriteDeny;
+            dataCacheReadEnable <= `DataCacheReadDeny;
+            dataCacheWriteEnable <= `DataCacheWriteAccept;
         end
         default: begin
             ALUop <= `ALUopReset;
             immValueOut <= immValueIn;
             regWriteEnable <= `RegWriteDeny;
             dataCacheReadEnable <= `DataCacheReadDeny;
+            dataCacheWriteEnable <= `DataCacheWriteDeny;
         end
     endcase
 end

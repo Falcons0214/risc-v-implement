@@ -24,6 +24,8 @@
 `define RamSize 63:0
 `define DataCacheReadAccept 1'b1
 `define DataCacheReadDeny 1'b0 
+`define DataCacheWriteAccept 1'b1
+`define DataCacheWriteDeny 1'b0
 
 // init value
 `define RegAddrReset 5'b0
@@ -33,6 +35,7 @@
 // Instruction opcode type
 `define Opcode_Type_I_Imm 7'b0010011
 `define Opcode_Type_I_Load 7'b0000011
+`define Opcode_Type_R_Store 7'b0100011
 
 // I_Type immediate instruction
 `define ORI 3'b110
