@@ -1,13 +1,13 @@
 `include "define.v"
 `include "PC.v"
-`include "rom.v"
+`include "instCache.v"
 `include "IF_ID.v"
 `include "decoder.v"
 `include "registerFile.v"
 `include "DEC_ALU.v"
 `include "ALU.v"
 `include "ALU_MEM.v"
-// `include "ram.v"
+`include "dataCache.v"
 `include "MEM_WB.v"
 
 module core;
@@ -33,14 +33,15 @@ wire [`DataSize] IF_IDdataOut;
 wire [`RegAddrSize] DecRead1;
 wire [`RegAddrSize] DecRead2;
 wire [`RegAddrSize] DecWrite;
-wire DecWriteEnable;
 wire [`OpcodeSize] opcodeToControl;
 wire [`Func3Size] func3ToControl;
-wire [`Func7Size] func7ToControl;
-wire [`DataSize] DecImmValue;
+wire [`immValueBus] DecImmValue;
 
 // control unit
+wire [`DataSize] ImmToALU;
 wire [`ALUControlBus] ALUop;
+wire regWriteEnable;
+wire dataCacheReadEnableDec;
 
 // register
 wire [`DataSize] RegOutData1;
@@ -48,6 +49,7 @@ wire [`DataSize] RegOutData2;
 
 // DEC_ALU
 wire ALUWriteEnable;
+wire dataCacheReadEnableALU;
 wire [`RegAddrSize] ALUWriteBackAddr;
 wire [`DataSize] ALUData1;
 wire [`DataSize] ALUData2;
@@ -59,27 +61,31 @@ wire [`DataSize] ALUoutData;
 
 // ALU_MEM
 wire aluMemWriteEnable;
+wire dataCacheReadEnableCache;
 wire [`DataSize] aluMemData;
+wire [`DataSize] aluMemRs2Data;
 wire [`RegAddrSize] aluMemWriteBackAddrOut;
+
+// ram
+wire selectS;
+wire [`DataSize] dataOut;
 
 // MEM_WB
 wire wbEnable;
 wire [`DataSize] writeBackData;
 wire [`RegAddrSize] writeBackAddr;
 
-// temp data
-wire [`DataSize] tmpDataFromRam;
-
 initial begin
-$readmemb("./data", rom1.rom);
+$readmemb("./data3", ram1.ram);
 $readmemb("./data2", regF1.regs);
-$monitor("time %4d, clock: %b, reset: %b, pcAddrOut: %b, romdataout: %b\ndecoder data1: %b, decoder data2: %b\nreg file dataOut1: %b\nDEC_ALU data1: %b\nALU data: %b immValue: %b\nALU_MEM data: %b\nwrite back data: %b, addr: %b, enable: %b\nResult: %b\n", $stime, clk, pcResetIn, pcAddrOut, romDataOut, DecRead1, DecRead2, RegOutData1, ALUData1, ALUoutData, ALUimmValue, aluMemData, writeBackData, writeBackAddr, wbEnable, regF1.regs[5'b00000]);
+$readmemb("./data", rom1.rom);
+$monitor("time %4d, clock: %b, reset: %b, pcAddrOut: %b, romdataout: %b\ndecoder data1: %b, decoder data2: %b\nreg file dataOut1: %b\nDEC_ALU data1: %b\nALU data: %b immValue: %b\nALU_MEM data: %b\nwrite back data: %b, addr: %b, enable: %b\nResult: %b\n", $stime, clk, pcResetIn, pcAddrOut, romDataOut, DecRead1, DecRead2, RegOutData1, ALUData1, ALUoutData, ALUimmValue, aluMemData, writeBackData, writeBackAddr, wbEnable, regF1.regs[5'b01100]);
 
 clk = 0;
 pcResetIn = 1;
 enable = 1;
 jump = 6'b0;
-pcAddrIn = 6'b0;
+pcAddrIn = 6'b000110;
 select = 0;
 flush = 0;
 
@@ -131,10 +137,8 @@ decoder dec1(
     .readAddr1(DecRead1),
     .readAddr2(DecRead2),
     .writeAddr(DecWrite),
-    .regWriteEnable(DecWriteEnable),
     .OutOpcode(opcodeToControl),
     .OutFunc3(func3ToControl),
-    .OutFunc7(func7ToControl),
     .immValue(DecImmValue)
 );
 
@@ -142,9 +146,12 @@ controlUnit control1(
     // in from decoder
     .opcode(opcodeToControl),
     .opFunc3(func3ToControl),
-    .opFunc7(func7ToControl),
+    .immValueIn(DecImmValue),
     // out to Dec_ALU
-    .ALUop(ALUop)
+    .ALUop(ALUop),
+    .immValueOut(ImmToALU),
+    .dataCacheReadEnable(dataCacheReadEnableDec),
+    .regWriteEnable(regWriteEnable)
 );
 
 register regF1(
@@ -166,18 +173,20 @@ DEC_ALU DEC_ALU1(
     .dataReg1(RegOutData1),
     .dataReg2(RegOutData2),
     // from decoder
-    .writeEnableReg(DecWriteEnable),
     .writeBackAddrIn(DecWrite),
-    .immValueReg(DecImmValue),
     // from control unit
     .ALUop(ALUop),
+    .immValueIn(ImmToALU),
+    .dataCacheReadEnableIn(dataCacheReadEnableDec),
+    .writeEnableReg(regWriteEnable),
     // out
+    .dataCacheReadEnableOut(dataCacheReadEnableALU),
     .writeEnableAlu(ALUWriteEnable),
     .writeBackAddrOut(ALUWriteBackAddr),
     .dataAlu1(ALUData1),
     .dataAlu2(ALUData2),
     .op(opALU),
-    .immValueAlu(ALUimmValue)
+    .immValueOut(ALUimmValue)
 );
 
 ALU ALU1(
@@ -194,24 +203,36 @@ ALU_MEM ALU_MEM1(
     // in
     .clk(clk),
     .dataIn(ALUoutData),
+    .dataRs2In(ALUData2),
     .writeEnableIn(ALUWriteEnable),
+    .dataCacheReadEnableIn(dataCacheReadEnableALU),
     .writeBackAddrIn(ALUWriteBackAddr),
     // out
+    .dataOut(aluMemData),
+    .dataRs2Out(aluMemRs2Data),
     .writeEnableOut(aluMemWriteEnable),
-    .writeBackAddrOut(aluMemWriteBackAddrOut),
-    .dataOut(aluMemData)
+    .dataCacheReadEnableOut(dataCacheReadEnableCache),
+    .writeBackAddrOut(aluMemWriteBackAddrOut)
+);
+
+ram ram1(
+    .dataCacheReadEnable(dataCacheReadEnableCache),
+    .addr(aluMemData),
+    .dataWrite(aluMemRs2Data),
+    .select(selectS),
+    .dataRead(dataOut)
 );
 
 MEM_WB MEM_WB1(
     // in
     .clk(clk),
-    .select(1'b1),
+    .select(selectS),
     .dataFromALU(aluMemData),
-    .dataFromRam(tmpDataFromRam),
-    .writeEnableIn(aluMemWriteEnable),
+    .dataFromRam(dataOut),
+    .regWriteEnableIn(aluMemWriteEnable),
     .writeBackAddrIn(aluMemWriteBackAddrOut),
     // out
-    .writeEnableOut(wbEnable),
+    .regWriteEnableOut(wbEnable),
     .writeBackAddrOut(writeBackAddr),
     .dataToReg(writeBackData)
 );

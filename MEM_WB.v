@@ -3,27 +3,27 @@
 module MEM_WB(
     input wire clk,
     input wire select,
-    input wire [`DataSize]dataFromALU, 
+    input wire [`DataSize]dataFromALU,
     input wire [`DataSize]dataFromRam,
 
     // from ALU_MEM
-    input wire writeEnableIn,
+    input wire regWriteEnableIn,
     input wire [`RegAddrSize] writeBackAddrIn,
 
     // to register file
-    output reg writeEnableOut,
+    output reg regWriteEnableOut,
     output reg [`RegAddrSize] writeBackAddrOut,
     output reg [`DataSize] dataToReg
 );
 
 always @(posedge clk) begin
-    writeEnableOut <= writeEnableIn;
+    regWriteEnableOut <= regWriteEnableIn;
     writeBackAddrOut <= writeBackAddrIn;
-    if(select) begin 
-        dataToReg <= dataFromALU;
+    if(select) begin
+        dataToReg <= dataFromRam;
     end 
     else begin
-        dataToReg <= dataFromRam;
+        dataToReg <= dataFromALU;
     end
 end
 

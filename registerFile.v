@@ -4,7 +4,7 @@ module register(
     // from decoder
     input wire [`RegAddrSize]readAddrF, // rs1
     input wire [`RegAddrSize]readAddrS, // rs2
-    input wire [`RegAddrSize]writeAddr, // rd
+    input wire [`RegAddrSize]writeAddr, // rd from write back
     
     // from WB
     input wire writeEnable,

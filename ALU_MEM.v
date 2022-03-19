@@ -7,23 +7,28 @@ module ALU_MEM(
     input wire [`DataSize] dataIn,
 
     // from DEC_ALU
+    input wire [`DataSize] dataRs2In,
     input wire writeEnableIn,
+    input wire dataCacheReadEnableIn,
     input wire [`RegAddrSize] writeBackAddrIn,
+    
+    // to ram
+    output reg dataCacheReadEnableOut,
+    output reg [`DataSize] dataOut,
+    output reg [`DataSize] dataRs2Out,
 
     // to MEM_WB
-    output reg resetOut,
     output reg writeEnableOut,
-    output reg [`RegAddrSize] writeBackAddrOut,
+    output reg [`RegAddrSize] writeBackAddrOut
 
-    // to ram
-    output reg [`DataSize] dataOut
 );
 
 always @(posedge clk) begin
     writeEnableOut <= writeEnableIn;
-    resetOut <= 1'b0;
+    dataCacheReadEnableOut <= dataCacheReadEnableIn;
     dataOut <= dataIn;
     writeBackAddrOut <= writeBackAddrIn;
+    dataRs2Out <= dataRs2In;
 end
 
 endmodule
