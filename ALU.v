@@ -1,5 +1,7 @@
 `include "define.v"
 
+// add ALUop decoder !!
+
 module ALU(
     // from DEC_ALU
     input wire [`DataSize] dataSource1,
@@ -13,11 +15,17 @@ module ALU(
 
 always @(*) begin
     case (op)
-        `ALUop_OR: begin
+        `ALUop_ORI: begin
             data <= dataSource1 | immValue;
         end
-        `ALUop_ADD: begin
+        `ALUop_ADDI: begin
             data <= dataSource1 + immValue;
+        end
+        `ALUop_ADD: begin
+            data <= dataSource1 + dataSource2;
+        end
+        `ALUop_SUB: begin
+            data <= dataSource1 - dataSource2;
         end
         default: begin
             data <= `DataBusReset;

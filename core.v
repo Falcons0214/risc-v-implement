@@ -41,8 +41,7 @@ wire [`immValueBus] DecImmValue;
 wire [`DataSize] ImmToALU;
 wire [`ALUControlBus] ALUop;
 wire regWriteEnable;
-wire dataCacheReadEnableDec;
-wire dataCacheWriteEnableDec;
+wire [`DataCacheControlBus] dataCCDec;
 
 // register
 wire [`DataSize] RegOutData1;
@@ -50,8 +49,7 @@ wire [`DataSize] RegOutData2;
 
 // DEC_ALU
 wire ALUWriteEnable;
-wire dataCacheReadEnableALU;
-wire dataCacheWriteEnableALU;
+wire [`DataCacheControlBus] dataCCALU;
 wire [`RegAddrSize] ALUWriteBackAddr;
 wire [`DataSize] ALUData1;
 wire [`DataSize] ALUData2;
@@ -63,8 +61,7 @@ wire [`DataSize] ALUoutData;
 
 // ALU_MEM
 wire aluMemWriteEnable;
-wire dataCacheReadEnableMem;
-wire dataCacheWriteEnableMem;
+wire [`DataCacheControlBus] dataCCMem;
 wire [`DataSize] aluMemData;
 wire [`DataSize] aluMemRs2Data;
 wire [`RegAddrSize] aluMemWriteBackAddrOut;
@@ -153,8 +150,7 @@ controlUnit control1(
     // out to Dec_ALU
     .ALUop(ALUop),
     .immValueOut(ImmToALU),
-    .dataCacheReadEnable(dataCacheReadEnableDec),
-    .dataCacheWriteEnable(dataCacheWriteEnableDec),
+    .dataCacheControl(dataCCDec),
     .regWriteEnable(regWriteEnable)
 );
 
@@ -181,12 +177,10 @@ DEC_ALU DEC_ALU1(
     // from control unit
     .ALUop(ALUop),
     .immValueIn(ImmToALU),
-    .dataCacheReadEnableIn(dataCacheReadEnableDec),
-    .dataCacheWriteEnableIn(dataCacheWriteEnableDec),
+    .dataCacheControlIn(dataCCDec),
     .writeEnableReg(regWriteEnable),
     // out
-    .dataCacheReadEnableOut(dataCacheReadEnableALU),
-    .dataCacheWriteEnableOut(dataCacheWriteEnableALU),
+    .dataCacheControlOut(dataCCALU),
     .writeEnableAlu(ALUWriteEnable),
     .writeBackAddrOut(ALUWriteBackAddr),
     .dataAlu1(ALUData1),
@@ -211,21 +205,18 @@ ALU_MEM ALU_MEM1(
     .dataIn(ALUoutData),
     .dataRs2In(ALUData2),
     .writeEnableIn(ALUWriteEnable),
-    .dataCacheReadEnableIn(dataCacheReadEnableALU),
-    .dataCacheWriteEnableIn(dataCacheWriteEnableALU),
     .writeBackAddrIn(ALUWriteBackAddr),
+    .dataCacheControlIn(dataCCALU),
     // out
     .dataOut(aluMemData),
     .dataRs2Out(aluMemRs2Data),
+    .dataCacheControlOut(dataCCMem),
     .writeEnableOut(aluMemWriteEnable),
-    .dataCacheReadEnableOut(dataCacheReadEnableMem),
-    .dataCacheWriteEnableOut(dataCacheWriteEnableMem),
     .writeBackAddrOut(aluMemWriteBackAddrOut)
 );
 
 ram ram1(
-    .dataCacheReadEnable(dataCacheReadEnableMem),
-    .dataCacheWriteEnable(dataCacheWriteEnableMem),
+    .dataCacheContol(dataCCMem),
     .addr(aluMemData),
     .dataWrite(aluMemRs2Data),
     .select(selectS),
