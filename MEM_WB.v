@@ -2,12 +2,14 @@
 
 module MEM_WB(
     input wire clk,
+
+    // from ram
     input wire select,
-    input wire [`DataSize]dataFromALU,
     input wire [`DataSize]dataFromRam,
 
     // from ALU_MEM
     input wire regWriteEnableIn,
+    input wire [`DataSize]dataFromALU,
     input wire [`RegAddrSize] writeBackAddrIn,
 
     // to register file

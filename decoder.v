@@ -7,6 +7,8 @@ module decoder(
     // to register file
     output reg [`RegAddrSize]readAddr1, 
     output reg [`RegAddrSize]readAddr2,
+
+    // to DEC_ALU
     output reg [`RegAddrSize]writeAddr,
 
     // to control unit
@@ -15,33 +17,24 @@ module decoder(
     output reg [`immValueBus] immValue
 );
 
-wire [6:0] opCode = inst[6:0];
-wire [2:0] func3 = inst[14:12];
-// wire [4:0] rd = inst[11:7];
-// wire [4:0] rs1 = inst[19:15];
-// wire [`immValueBus] immV = inst[31:20];
-
 always @(*) begin
-    OutOpcode <= opCode;
-    OutFunc3 <= func3;
-    if (opCode == `Opcode_Type_I_Imm ||
-        opCode == `Opcode_Type_I_Load ||
-        opCode == `Opcode_Type_R_RRop) begin
-        readAddr1 <= inst[19:15]; // rs1, load base addr
-        readAddr2 <= inst[24:20]; // rs2
-        writeAddr <= inst[11:7]; // rd, dest
-        immValue <= inst[31:20]; // imm, offset
+    OutOpcode <= inst[6:0];
+    OutFunc3 <= inst[14:12];
+    readAddr1 <= inst[19:15];
+    readAddr2 <= inst[24:20];
+    writeAddr <= inst[11:7];
+    if (inst[6:0] == `Opcode_Type_I_Imm ||
+        inst[6:0] == `Opcode_Type_I_Load ||
+        inst[6:0] == `Opcode_Type_R_RRop) begin
+        immValue <= inst[31:20];
     end
-    else if (opCode == `Opcode_Type_R_Store) begin
-        readAddr1 <= inst[19:15]; // base addr
-        readAddr2 <= inst[24:20]; // rs2, src
-        writeAddr <= `RegAddrReset;
-        immValue <= {inst[31:25], inst[11:7]}; // offset
+    else if (inst[6:0] == `Opcode_Type_R_Store) begin
+        immValue <= {inst[31:25], inst[11:7]};
+    end
+    else if (inst[6:0] == `Opcode_Type_B_CB) begin
+        immValue <= {inst[31], inst[7], inst[30:25], inst[11:8]};
     end
     else begin
-        readAddr1 <= `RegAddrReset;
-        readAddr2 <= `RegAddrReset;
-        writeAddr <= `RegAddrReset;
         immValue <= `ImmReset;
     end
 end 
@@ -62,6 +55,7 @@ module controlUnit(
 );
 
 always @(*) begin
+    immValueOut <= {{20{immValueIn[11]}}, immValueIn[11:0]};
     case (opcode)
         `Opcode_Type_I_Imm: begin
             case (opFunc3)
@@ -74,17 +68,14 @@ always @(*) begin
             endcase
             regWriteEnable <= `RegWriteAccept;
             dataCacheControl <= `DataCacheNOP;
-            immValueOut <= {{20{immValueIn[11]}}, immValueIn[11:0]};
         end
         `Opcode_Type_I_Load: begin
             case (opFunc3) // decide sign extend width
                 `LW: begin // 32bit
                     ALUop <= `ALUop_ADDI;
-                    immValueOut <= {{20{immValueIn[11]}}, immValueIn[11:0]};
                 end
                 default: begin
                     ALUop <= `ALUopReset;
-                    immValueOut <= immValueIn;
                 end
             endcase
             regWriteEnable <= `RegWriteAccept;
@@ -94,11 +85,9 @@ always @(*) begin
             case (opFunc3) // same as Load
                 `SW: begin // 32bits
                     ALUop <= `ALUop_ADDI;
-                    immValueOut <= {{20{immValueIn[11]}}, immValueIn[11:0]};
                 end
                 default: begin
                     ALUop <= `ALUopReset;
-                    immValueOut <= immValueIn;
                 end
             endcase
             regWriteEnable <= `RegWriteDeny;
@@ -117,13 +106,11 @@ always @(*) begin
                     endcase
                 end
             endcase
-            immValueOut <= immValueIn;
             regWriteEnable <= `RegWriteAccept;
             dataCacheControl <= `DataCacheNOP;
         end
-        default: begin
+        default: begin // `Opcode_Type_B_CB in here
             ALUop <= `ALUopReset;
-            immValueOut <= immValueIn;
             regWriteEnable <= `RegWriteDeny;
             dataCacheControl <= `DataCacheNOP;
         end

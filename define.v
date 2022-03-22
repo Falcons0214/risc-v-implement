@@ -5,7 +5,7 @@
 
 // data bus size
 `define DataSize 31:0
-`define ALUControlBus 3:0 // 3bit decide imm 0 -> imm, 1 -> reg data
+`define ALUControlBus 3:0 // 3rd bit decide imm 0 -> imm, 1 -> reg data
 `define immValueBus 11:0
 
 // register file 
@@ -39,6 +39,7 @@
 `define Opcode_Type_I_Load 7'b0000011
 `define Opcode_Type_R_Store 7'b0100011
 `define Opcode_Type_R_RRop 7'b0110011
+`define Opcode_Type_B_CB 7'b1100011
 
 // I_Type immediate instruction
 `define ORI 3'b110
@@ -55,8 +56,12 @@
 `define ADD 7'b0000000
 `define SUB 7'b0100000
 
+// R_Type Branch instruction
+`define BEQ 3'b000
+`define BNE 3'b001
+
 // ALU control
-`define ALUopReset 4'b000
+`define ALUopReset 4'b0000
 `define ALUop_ADDI 4'b1001
 `define ALUop_SUB 4'b0010
 `define ALUop_ADD 4'b0001

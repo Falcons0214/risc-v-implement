@@ -3,10 +3,10 @@
 module PC(
     input wire clk,
     input wire resetIn,
-    input wire enable, 
+    input wire enable,
     input wire select, // 1: jump, 0: next
     input wire [`RomAddr] addrIn,
-    input wire [`RomAddr] addrJump, 
+    input wire [`RomAddr] addrJump,
     
     // to rom
     output reg [`RomAddr] addrOut
@@ -22,7 +22,7 @@ always @(posedge clk) begin
                 addrOut <= addrJump;
             end
             else begin
-                addrOut <= addrOut + 3'b010; // test
+                addrOut <= addrOut + 4'b0001; // test
             end
         end
         else begin

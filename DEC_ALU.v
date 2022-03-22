@@ -9,6 +9,8 @@ module DEC_ALU(
 
     // from decoder
     input wire [`RegAddrSize] writeBackAddrIn,
+    input wire [`RegAddrSize] dataS1AddrIn, 
+    input wire [`RegAddrSize] dataS2AddrIn,
 
     // from contol unit
     input wire [`ALUControlBus] ALUop,

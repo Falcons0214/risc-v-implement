@@ -79,7 +79,7 @@ initial begin
 $readmemb("./data3", ram1.ram);
 $readmemb("./data2", regF1.regs);
 $readmemb("./data", rom1.rom);
-$monitor("time %4d, clock: %b, reset: %b, pcAddrOut: %b, romdataout: %b\ndecoder data1: %b, decoder data2: %b\nreg file dataOut1: %b\nDEC_ALU data1: %b\nALU data: %b immValue: %b\nALU_MEM data: %b\nwrite back data: %b, addr: %b, enable: %b\nResult: %b\n", $stime, clk, pcResetIn, pcAddrOut, romDataOut, DecRead1, DecRead2, RegOutData1, ALUData1, ALUoutData, ALUimmValue, aluMemData, writeBackData, writeBackAddr, wbEnable, regF1.regs[5'b00000]);
+$monitor("time %4d, clock: %b, reset: %b, pcAddrOut: %b, romdataout: %b\ndecoder data1: %b, decoder data2: %b\nreg file dataOut1: %b\nDEC_ALU data1: %b\nALU data: %b immValue: %b\nALU_MEM data: %b\nwrite back data: %b, addr: %b, enable: %b\nResult: %b\n", $stime, clk, pcResetIn, pcAddrOut, romDataOut, DecRead1, DecRead2, RegOutData1, ALUData1, ALUoutData, ALUimmValue, aluMemData, writeBackData, writeBackAddr, wbEnable, ram1.ram[5'b01011]);
 
 clk = 0;
 pcResetIn = 1;
@@ -159,7 +159,7 @@ register regF1(
     .readAddrF(DecRead1),
     .readAddrS(DecRead2),
     .writeEnable(wbEnable), // from WB
-    .writeAddr(writeBackAddr), 
+    .writeAddr(writeBackAddr), // from WB
     .writeDate(writeBackData), // from WB
     // out
     .outDataF(RegOutData1),
@@ -174,6 +174,8 @@ DEC_ALU DEC_ALU1(
     .dataReg2(RegOutData2),
     // from decoder
     .writeBackAddrIn(DecWrite),
+    .dataS1AddrIn(DecRead1),
+    .dataS2AddrIn(DecRead2),
     // from control unit
     .ALUop(ALUop),
     .immValueIn(ImmToALU),

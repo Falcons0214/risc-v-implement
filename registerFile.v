@@ -4,10 +4,10 @@ module register(
     // from decoder
     input wire [`RegAddrSize]readAddrF, // rs1
     input wire [`RegAddrSize]readAddrS, // rs2
-    input wire [`RegAddrSize]writeAddr, // rd from write back
     
     // from WB
     input wire writeEnable,
+    input wire [`RegAddrSize]writeAddr,
     input wire [`DataSize]writeDate,
     
     // to Dec_ALU
