@@ -27,7 +27,11 @@ module DEC_ALU(
     output reg [`DataSize] dataAlu1,
     output reg [`DataSize] dataAlu2, // & to ALU_MEM
     output reg [`ALUControlBus] op,
-    output reg [`DataSize] immValueOut 
+    output reg [`DataSize] immValueOut,
+
+    // to forwarding unit
+    output reg [`RegAddrSize] dataS1AddrOut,
+    output reg [`RegAddrSize] dataS2AddrOut
 );
 
 always @(posedge clk)begin
@@ -38,6 +42,8 @@ always @(posedge clk)begin
     dataAlu2 <= dataReg2;
     op <= ALUop;
     immValueOut <= immValueIn;
+    dataS1AddrOut <= dataS1AddrIn;
+    dataS2AddrOut <= dataS2AddrIn;
 end
 
 endmodule

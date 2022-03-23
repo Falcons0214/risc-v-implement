@@ -69,3 +69,9 @@
 
 // ALU 
 `define NOP 7'b0
+
+// ALUmuxUnit
+`define ALUMuxSelectBus 1:0
+`define ALUMuxDataFromReg 2'b01
+`define ALUMuxDataFromALU_MEM 2'b10
+`define ALUMuxDataFromMEM_WB 2'b11

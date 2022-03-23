@@ -9,6 +9,7 @@
 `include "ALU_MEM.v"
 `include "dataCache.v"
 `include "MEM_WB.v"
+`include "forward.v"
 
 module core;
 
@@ -55,6 +56,12 @@ wire [`DataSize] ALUData1;
 wire [`DataSize] ALUData2;
 wire [`ALUControlBus] opALU;
 wire [`DataSize] ALUimmValue;
+wire [`RegAddrSize] regDataAddr1;
+wire [`RegAddrSize] regDataAddr2;
+
+// forwarding unit
+wire [`ALUMuxSelectBus] s1;
+wire [`ALUMuxSelectBus] s2;
 
 // ALU
 wire [`DataSize] ALUoutData;
@@ -79,7 +86,7 @@ initial begin
 $readmemb("./data3", ram1.ram);
 $readmemb("./data2", regF1.regs);
 $readmemb("./data", rom1.rom);
-$monitor("time %4d, clock: %b, reset: %b, pcAddrOut: %b, romdataout: %b\ndecoder data1: %b, decoder data2: %b\nreg file dataOut1: %b\nDEC_ALU data1: %b\nALU data: %b immValue: %b\nALU_MEM data: %b\nwrite back data: %b, addr: %b, enable: %b\nResult: %b\n", $stime, clk, pcResetIn, pcAddrOut, romDataOut, DecRead1, DecRead2, RegOutData1, ALUData1, ALUoutData, ALUimmValue, aluMemData, writeBackData, writeBackAddr, wbEnable, ram1.ram[5'b01011]);
+$monitor("time %4d, clock: %b, reset: %b, pcAddrOut: %b, romdataout: %b\ndecoder data1: %b, decoder data2: %b\nreg file dataOut1: %b\nDEC_ALU data1: %b\nALU data: %b immValue: %b\nALU_MEM data: %b\nwrite back data: %b, addr: %b, enable: %b\nResult: %b\n", $stime, clk, pcResetIn, pcAddrOut, romDataOut, DecRead1, DecRead2, RegOutData1, ALUData1, ALUoutData, ALUimmValue, aluMemData, writeBackData, writeBackAddr, wbEnable, regF1.regs[5'b00000]);
 
 clk = 0;
 pcResetIn = 1;
@@ -188,17 +195,32 @@ DEC_ALU DEC_ALU1(
     .dataAlu1(ALUData1),
     .dataAlu2(ALUData2),
     .op(opALU),
-    .immValueOut(ALUimmValue)
+    .immValueOut(ALUimmValue),
+    .dataS1AddrOut(regDataAddr1), // to forwarding unit
+    .dataS2AddrOut(regDataAddr2)  // to forwarding unit
+);
+
+forward forwardUnit(
+    .addr1(regDataAddr1),
+    .addr2(regDataAddr2),
+    .preAddr_ALU_MEM(aluMemWriteBackAddrOut), // from ALU_MEM
+    .preAddr_MEM_WB(writeBackAddr), // from MEM_WB
+    .select1(s1),
+    .select2(s2)
 );
 
 ALU ALU1(
     // in
-    .op(opALU), // from control unit
-    .dataSource1(ALUData1),
-    .dataSource2(ALUData2),
+    .regDataFromRegS1(ALUData1),
+    .regDataFromRegS2(ALUData2),
+    .regDataFromALU_MEM(aluMemData),
+    .regDataFromMEM_WB(writeBackData),
     .immValue(ALUimmValue),
+    .op(opALU),
+    .select1(s1),
+    .select2(s2),
     // out
-    .data(ALUoutData)
+    .dataToALU_MEM(ALUoutData)
 );
 
 ALU_MEM ALU_MEM1(
