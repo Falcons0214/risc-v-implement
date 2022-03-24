@@ -2,7 +2,7 @@
 
 module ram(
     // from ALU_MEM
-    input wire [`DataCacheControlBus] dataCacheContol,
+    input wire [`DataCacheControlBus] dataCacheContol,                          
     input wire [`DataSize] addr,
     input wire [`DataSize] dataWrite,
 

@@ -86,7 +86,7 @@ initial begin
 $readmemb("./data3", ram1.ram);
 $readmemb("./data2", regF1.regs);
 $readmemb("./data", rom1.rom);
-$monitor("time %4d, clock: %b, reset: %b, pcAddrOut: %b, romdataout: %b\ndecoder data1: %b, decoder data2: %b\nreg file dataOut1: %b\nDEC_ALU data1: %b\nALU data: %b immValue: %b\nALU_MEM data: %b\nwrite back data: %b, addr: %b, enable: %b\nResult: %b\n", $stime, clk, pcResetIn, pcAddrOut, romDataOut, DecRead1, DecRead2, RegOutData1, ALUData1, ALUoutData, ALUimmValue, aluMemData, writeBackData, writeBackAddr, wbEnable, regF1.regs[5'b00000]);
+$monitor("time %4d, clock: %b, reset: %b, pcAddrOut: %b, romdataout: %b\ndecoder data1: %b, decoder data2: %b\nreg file dataOut1: %b\nDEC_ALU data1: %b\nALU data: %b immValue: %b\nALU_MEM data: %b\nwrite back data: %b, addr: %b, enable: %b\nResult: %b\nReg 17: %b\nReg 18: %b\nReg 19: %b", $stime, clk, pcResetIn, pcAddrOut, romDataOut, DecRead1, DecRead2, RegOutData1, ALUData1, ALUoutData, ALUimmValue, aluMemData, writeBackData, writeBackAddr, wbEnable, regF1.regs[5'b00000], regF1.regs[5'b10000], regF1.regs[5'b10001], regF1.regs[5'b10010]);
 
 clk = 0;
 pcResetIn = 1;
