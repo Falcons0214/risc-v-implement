@@ -17,7 +17,6 @@
 // rom
 `define RomUnitSize 31:0
 `define RomSize 63:0
-`define RomAddr 5:0 
 
 // ram
 `define RamUnitSize 31:0
@@ -31,7 +30,6 @@
 
 // init value
 `define RegAddrReset 5'b0
-`define RomAddrReset 6'b0
 `define DataBusReset 32'b0
 
 // Instruction opcode type

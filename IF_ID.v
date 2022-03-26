@@ -4,23 +4,24 @@ module IF_ID(
     input wire clk,
 
     // from Hazard detect unit
-    input wire enable,
+    input wire locker,
 
     // from PC loader
-    input wire [`RomAddr]addrIn,
+    input wire reset,
+    input wire [`DataSize]addrIn,
 
     // from rom
     input wire [`DataSize]dataIn,
 
     // back to PC or Dec_ALU
-    output reg [`RomAddr]addrOut,
+    output reg [`DataSize]addrOut,
 
     // to Dec
     output reg [`DataSize]dataOut
 );
 
 always @(posedge clk) begin
-    if (enable) begin
+    if (locker || reset) begin
         addrOut <= addrIn;
         dataOut <= dataIn;
     end

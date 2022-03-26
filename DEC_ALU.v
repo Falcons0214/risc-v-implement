@@ -8,6 +8,7 @@ module DEC_ALU(
     input wire [`DataSize] dataReg2,
 
     // from decoder
+    input wire [`OpcodeSize] opCodeFromDec,
     input wire [`RegAddrSize] writeBackAddrIn,
     input wire [`RegAddrSize] dataS1AddrIn, 
     input wire [`RegAddrSize] dataS2AddrIn,
@@ -29,6 +30,9 @@ module DEC_ALU(
     output reg [`ALUControlBus] op,
     output reg [`DataSize] immValueOut,
 
+    // to hazard detect unit
+    output reg [`OpcodeSize] opCodeToHazard,
+
     // to forwarding unit
     output reg [`RegAddrSize] dataS1AddrOut,
     output reg [`RegAddrSize] dataS2AddrOut
@@ -44,6 +48,7 @@ always @(posedge clk)begin
     immValueOut <= immValueIn;
     dataS1AddrOut <= dataS1AddrIn;
     dataS2AddrOut <= dataS2AddrIn;
+    opCodeToHazard <= opCodeFromDec;
 end
 
 endmodule

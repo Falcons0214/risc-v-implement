@@ -12,7 +12,7 @@ module decoder(
     output reg [`RegAddrSize]writeAddr,
 
     // to control unit
-    output reg [`OpcodeSize] OutOpcode,
+    output reg [`OpcodeSize] OutOpcode, // to DEC_ALU
     output reg [`Func3Size] OutFunc3,
     output reg [`immValueBus] immValue
 );

@@ -5,7 +5,7 @@ module rom(
     input wire flush,
     
     // from PC loader
-    input wire [`RomAddr]addr,
+    input wire [`DataSize]addr,
 
     // to IF_ID
     output reg [`DataSize]inst
@@ -18,7 +18,7 @@ always @(*) begin
         inst <= `DataBusReset;
     end
     else begin
-        inst <= rom[addr];
+        inst <= rom[addr[31:2] + 2'b00];
     end
 end
 

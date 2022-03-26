@@ -3,26 +3,30 @@
 module PC(
     input wire clk,
     input wire resetIn,
-    input wire enable,
+    input wire locker, // from hazard detect unit 
     input wire select, // 1: jump, 0: next
-    input wire [`RomAddr] addrIn,
-    input wire [`RomAddr] addrJump,
+    input wire [`DataSize] addrIn,
+    input wire [`DataSize] addrJump,
     
     // to rom
-    output reg [`RomAddr] addrOut
+    output reg [`DataSize] addrOut,
+
+    // to IF_ID
+    output reg resetOut
 );
 
 always @(posedge clk) begin
+    resetOut <= resetIn;
     if (resetIn) begin
-        addrOut <= `RomAddrReset;
+        addrOut <= `DataBusReset;
     end
     else begin
-        if (enable) begin
+        if (locker != 0) begin
             if (select) begin
                 addrOut <= addrJump;
             end
             else begin
-                addrOut <= addrOut + 4'b0001; // test
+                addrOut <= addrOut + 3'b100; // PC + 4
             end
         end
         else begin
