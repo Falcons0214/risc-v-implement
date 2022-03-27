@@ -29,6 +29,7 @@ wire [`DataSize] pcAddrOut;
 wire [`DataSize] romDataOut;
 
 // IF_ID
+wire resetToDEC;
 wire [`DataSize] IF_IDromAddrOut;
 wire [`DataSize] IF_IDdataOut;
 
@@ -47,8 +48,9 @@ wire regWriteEnable;
 wire [`DataCacheControlBus] dataCCDec;
 
 // hazard dectect unit
-wire IFIDlock;
 wire PClock;
+wire IFIDlock;
+wire DEClock;
 
 // register
 wire [`DataSize] RegOutData1;
@@ -93,7 +95,7 @@ initial begin
 $readmemb("./data3", ram1.ram);
 $readmemb("./data2", regF1.regs);
 $readmemb("./data", rom1.rom);
-$monitor("time %4d, clock: %b, reset: %b, pcAddrOut: %b, romdataout: %b\ndecoder data1: %b, decoder data2: %b, opcode: %b\nreg file dataOut1: %b\nDEC_ALU data1: %b\nALU data: %b immValue: %b\nALU_MEM data: %b\nwrite back data: %b, addr: %b, enable: %b\nResult: %b\nReg 17: %b\nReg 18: %b\nReg 19: %b", $stime, clk, pcResetIn, pcAddrOut, romDataOut, DecRead1, DecRead2, opcodeToControl, RegOutData1, ALUData1, ALUoutData, ALUimmValue, aluMemData, writeBackData, writeBackAddr, wbEnable, regF1.regs[5'b01100], regF1.regs[5'b10000], regF1.regs[5'b10001], regF1.regs[5'b10010]);
+$monitor("time %4d, clock: %b, reset: %b, pcAddrOut: %b, romdataout: %b\ndecoder data1: %b, decoder data2: %b, opcode: %b\nreg file dataOut1: %b\nDEC_ALU data1: %b, locker: %b\nALU data: %b immValue: %b\nALU_MEM data: %b, wb: %b\nwrite back data: %b, addr: %b, enable: %b\nResult: %b\nReg 17: %b\nReg 18: %b\nReg 19: %b\n", $stime, clk, pcResetIn, pcAddrOut, romDataOut, DecRead1, DecRead2, opcodeToControl, RegOutData1, ALUData1, DEClock, ALUoutData, ALUimmValue, aluMemData, aluMemWriteBackAddrOut, writeBackData, writeBackAddr, wbEnable, regF1.regs[5'b10011], regF1.regs[5'b10000], regF1.regs[5'b10001], regF1.regs[5'b10010]);
 
 clk = 0;
 pcResetIn = 1;
@@ -105,7 +107,7 @@ flush = 0;
 #10
 pcResetIn = 0;
 
-#90 $finish; 
+#110 $finish; 
 end
 
 always begin
@@ -137,12 +139,11 @@ IF_ID ifid1(
     // in
     .clk(clk),
     .locker(IFIDlock),
-    .reset(resetToIFID),
-    .addrIn(pcAddrOut),
+    .resetIn(resetToIFID),
     .dataIn(romDataOut),
     // out
-    .addrOut(IF_IDromAddrOut),
-    .dataOut(IF_IDdataOut)
+    .dataOut(IF_IDdataOut),
+    .resetOut(resetToDEC)
 );
 
 decoder dec1(
@@ -186,13 +187,15 @@ hazardDetectUnit ha1(
     .writeBackAddr(ALUWriteBackAddr),
     .source1(DecRead1),
     .source2(DecRead2),
+    .PCLocker(PClock),
     .IF_IDLocker(IFIDlock),
-    .PCLocker(PClock)
+    .DECLocker(DEClock)
 );
 
 DEC_ALU DEC_ALU1(
     // in
     .clk(clk),
+    .reset(resetToDEC),
     // from register
     .dataReg1(RegOutData1),
     .dataReg2(RegOutData2),
@@ -206,6 +209,7 @@ DEC_ALU DEC_ALU1(
     .immValueIn(ImmToALU),
     .dataCacheControlIn(dataCCDec),
     .writeEnableReg(regWriteEnable),
+    .locker(DEClock), // from hazard detect unit
     // out
     .dataCacheControlOut(dataCCALU),
     .writeEnableAlu(ALUWriteEnable),

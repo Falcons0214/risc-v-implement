@@ -7,8 +7,7 @@ module IF_ID(
     input wire locker,
 
     // from PC loader
-    input wire reset,
-    input wire [`DataSize]addrIn,
+    input wire resetIn,
 
     // from rom
     input wire [`DataSize]dataIn,
@@ -17,16 +16,16 @@ module IF_ID(
     output reg [`DataSize]addrOut,
 
     // to Dec
-    output reg [`DataSize]dataOut
+    output reg [`DataSize]dataOut,
+    output reg resetOut
 );
 
 always @(posedge clk) begin
-    if (locker || reset) begin
-        addrOut <= addrIn;
+    resetOut <= resetIn;
+    if (locker || resetIn) begin
         dataOut <= dataIn;
     end
     else begin 
-        addrOut <= addrOut;
         dataOut <= dataOut;
     end
 end

@@ -16,20 +16,20 @@ module forward(
 );
 
 always @(*) begin
-    if (addr1 == preAddr_ALU_MEM) begin
-        select1 <= `ALUMuxDataFromALU_MEM;
-    end
-    else if (addr1 == preAddr_MEM_WB) begin
+    if (addr1 == preAddr_MEM_WB) begin
         select1 <= `ALUMuxDataFromMEM_WB;
+    end
+    else if (addr1 == preAddr_ALU_MEM) begin
+        select1 <= `ALUMuxDataFromALU_MEM;
     end
     else begin
         select1 <= `ALUMuxDataFromReg;
     end
-    if (addr2 == preAddr_ALU_MEM) begin
-        select2 <= `ALUMuxDataFromALU_MEM;
-    end
-    else if (addr2 == preAddr_MEM_WB) begin
+    if (addr2 == preAddr_MEM_WB) begin
         select2 <= `ALUMuxDataFromMEM_WB;
+    end
+    else if (addr2 == preAddr_ALU_MEM) begin
+        select2 <= `ALUMuxDataFromALU_MEM;
     end
     else begin
         select2 <= `ALUMuxDataFromReg;

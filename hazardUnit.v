@@ -9,26 +9,28 @@ module hazardDetectUnit(
     input wire [`RegAddrSize] source1,
     input wire [`RegAddrSize] source2,
 
+    output reg PCLocker,
     output reg IF_IDLocker,
-    output reg PCLocker
+    output reg DECLocker
 );
-
-
 
 always @(*) begin
     if (opCodeFromDec === `Opcode_Type_I_Load) begin
         if (source1 === writeBackAddr || source2 === writeBackAddr) begin
             IF_IDLocker <= 1'b0;
-            PCLocker <= 1'b0;  
+            PCLocker <= 1'b0;
+            DECLocker <= 1'b0;
         end
         else begin
-            IF_IDLocker <= 1'b1;
             PCLocker <= 1'b1;
+            IF_IDLocker <= 1'b1;
+            DECLocker <= 1'b1;
         end
     end
     else begin
-        IF_IDLocker <= 1'b1;
         PCLocker <= 1'b1;
+        IF_IDLocker <= 1'b1;
+        DECLocker <= 1'b1;
     end
 end
 
