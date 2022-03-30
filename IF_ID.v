@@ -8,6 +8,7 @@ module IF_ID(
 
     // from PC loader
     input wire resetIn,
+    input wire [`DataSize] pcIn,
 
     // from rom
     input wire [`DataSize]dataIn,
@@ -17,11 +18,15 @@ module IF_ID(
 
     // to Dec
     output reg [`DataSize]dataOut,
-    output reg resetOut
+    output reg resetOut,
+
+    // to branchUnit
+    output reg [`DataSize] pcOut
 );
 
 always @(posedge clk) begin
     resetOut <= resetIn;
+    pcOut <= pcIn;
     if (locker || resetIn) begin
         dataOut <= dataIn;
     end

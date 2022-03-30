@@ -37,7 +37,7 @@
 `define Opcode_Type_I_Load 7'b0000011
 `define Opcode_Type_R_Store 7'b0100011
 `define Opcode_Type_R_RRop 7'b0110011
-`define Opcode_Type_B_CB 7'b1100011
+`define Opcode_Type_B_BRANCH 7'b1100011
 
 // I_Type immediate instruction
 `define ORI 3'b110

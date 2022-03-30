@@ -31,7 +31,7 @@ always @(*) begin
     else if (inst[6:0] == `Opcode_Type_R_Store) begin
         immValue <= {inst[31:25], inst[11:7]};
     end
-    else if (inst[6:0] == `Opcode_Type_B_CB) begin
+    else if (inst[6:0] == `Opcode_Type_B_BRANCH) begin
         immValue <= {inst[31], inst[7], inst[30:25], inst[11:8]};
     end
     else begin
@@ -55,66 +55,74 @@ module controlUnit(
 );
 
 always @(*) begin
-    immValueOut <= {{20{immValueIn[11]}}, immValueIn[11:0]};
-    case (opcode)
-        `Opcode_Type_I_Imm: begin
-            case (opFunc3)
-                `ORI: begin
-                    ALUop <= `ALUop_ORI;
-                end
-                default: begin
-                    ALUop <= `ALUopReset;
-                end
-            endcase
-            regWriteEnable <= `RegWriteAccept;
-            dataCacheControl <= `DataCacheNOP;
-        end
-        `Opcode_Type_I_Load: begin
-            case (opFunc3) // decide sign extend width
-                `LW: begin // 32bit
-                    ALUop <= `ALUop_ADDI;
-                end
-                default: begin
-                    ALUop <= `ALUopReset;
-                end
-            endcase
-            regWriteEnable <= `RegWriteAccept;
-            dataCacheControl <= `DataCacheRead;
-        end
-        `Opcode_Type_R_Store: begin
-            case (opFunc3) // same as Load
-                `SW: begin // 32bits
-                    ALUop <= `ALUop_ADDI;
-                end
-                default: begin
-                    ALUop <= `ALUopReset;
-                end
-            endcase
-            regWriteEnable <= `RegWriteDeny;
-            dataCacheControl <= `DataCacheWrite;
-        end
-        `Opcode_Type_R_RRop: begin
-            case (opFunc3)
-                `ADDSUB: begin
-                    case (immValueIn[11:5])
-                        `ADD: begin
-                            ALUop <= `ALUop_ADD;
-                        end
-                        `SUB: begin
-                            ALUop <= `ALUop_SUB;
-                        end
-                    endcase
-                end
-            endcase
-            regWriteEnable <= `RegWriteAccept;
-            dataCacheControl <= `DataCacheNOP;
-        end
-        default: begin // `Opcode_Type_B_CB in here
-            ALUop <= `ALUopReset;
-            regWriteEnable <= `RegWriteDeny;
-            dataCacheControl <= `DataCacheNOP;
-        end
-    endcase
+    if (opcode === `Opcode_Type_B_BRANCH) begin
+        immValueOut <= {{19{immValueIn[11]}}, immValueIn[11:0], 1'b0}; // LSD add 0
+        ALUop <= `ALUopReset;
+        regWriteEnable <= `RegWriteDeny;
+        dataCacheControl <= `DataCacheNOP;
+    end
+    else begin
+        immValueOut <= {{20{immValueIn[11]}}, immValueIn[11:0]};
+        case (opcode)
+            `Opcode_Type_I_Imm: begin
+                case (opFunc3)
+                    `ORI: begin
+                        ALUop <= `ALUop_ORI;
+                    end
+                    default: begin
+                        ALUop <= `ALUopReset;
+                    end
+                endcase
+                regWriteEnable <= `RegWriteAccept;
+                dataCacheControl <= `DataCacheNOP;
+            end
+            `Opcode_Type_I_Load: begin
+                case (opFunc3) // decide sign extend width
+                    `LW: begin // 32bit
+                        ALUop <= `ALUop_ADDI;
+                    end
+                    default: begin
+                        ALUop <= `ALUopReset;
+                    end
+                endcase
+                regWriteEnable <= `RegWriteAccept;
+                dataCacheControl <= `DataCacheRead;
+            end
+            `Opcode_Type_R_Store: begin
+                case (opFunc3) // same as Load
+                    `SW: begin // 32bits
+                        ALUop <= `ALUop_ADDI;
+                    end
+                    default: begin
+                        ALUop <= `ALUopReset;
+                    end
+                endcase
+                regWriteEnable <= `RegWriteDeny;
+                dataCacheControl <= `DataCacheWrite;
+            end
+            `Opcode_Type_R_RRop: begin
+                case (opFunc3)
+                    `ADDSUB: begin
+                        case (immValueIn[11:5])
+                            `ADD: begin
+                                ALUop <= `ALUop_ADD;
+                            end
+                            `SUB: begin
+                                ALUop <= `ALUop_SUB;
+                            end
+                        endcase
+                    end
+                endcase
+                regWriteEnable <= `RegWriteAccept;
+                dataCacheControl <= `DataCacheNOP;
+            end
+            default: begin // `Opcode_Type_B_CB in here
+                ALUop <= `ALUopReset;
+                regWriteEnable <= `RegWriteDeny;
+                dataCacheControl <= `DataCacheNOP;
+            end
+        endcase
+    end
 end
 
 endmodule

@@ -5,12 +5,13 @@
 `include "decoder.v"
 `include "registerFile.v"
 `include "DEC_ALU.v"
-`include "ALU.v"
+// `include "ALU.v"
 `include "ALU_MEM.v"
 `include "dataCache.v"
 `include "MEM_WB.v"
 `include "forward.v"
 `include "hazardUnit.v"
+`include "branchUnit.v"
 
 module core;
 
@@ -32,6 +33,7 @@ wire [`DataSize] romDataOut;
 wire resetToDEC;
 wire [`DataSize] IF_IDromAddrOut;
 wire [`DataSize] IF_IDdataOut;
+wire [`DataSize] pcToBranchUnit;
 
 // decoder
 wire [`RegAddrSize] DecRead1;
@@ -56,6 +58,14 @@ wire DEClock;
 wire [`DataSize] RegOutData1;
 wire [`DataSize] RegOutData2;
 
+// forwarding unit branch
+wire [`ALUMuxSelectBus] s1B;
+wire [`ALUMuxSelectBus] s2B;
+
+// branchUnit
+wire [`DataSize] pcToPc;
+wire branchFlag;
+
 // DEC_ALU
 wire ALUWriteEnable;
 wire [`DataCacheControlBus] dataCCALU;
@@ -68,7 +78,7 @@ wire [`RegAddrSize] regDataAddr1;
 wire [`RegAddrSize] regDataAddr2;
 wire [`OpcodeSize] opCodeToHa;
 
-// forwarding unit
+// forwarding unit RR
 wire [`ALUMuxSelectBus] s1;
 wire [`ALUMuxSelectBus] s2;
 
@@ -119,9 +129,9 @@ PC pc1(
     .clk(clk),
     .resetIn(pcResetIn),
     .locker(PClock),
-    .select(select),
+    .select(branchFlag),
     .addrIn(pcAddrIn),
-    .addrJump(jump),
+    .addrJump(pcToPc),
     // out
     .addrOut(pcAddrOut),
     .resetOut(resetToIFID)
@@ -129,7 +139,7 @@ PC pc1(
 
 rom rom1(
     // in
-    .flush(flush),
+    .flush(branchFlag),
     .addr(pcAddrOut),
     // out
     .inst(romDataOut)
@@ -140,10 +150,12 @@ IF_ID ifid1(
     .clk(clk),
     .locker(IFIDlock),
     .resetIn(resetToIFID),
+    .pcIn(pcAddrOut),
     .dataIn(romDataOut),
     // out
     .dataOut(IF_IDdataOut),
-    .resetOut(resetToDEC)
+    .resetOut(resetToDEC),
+    .pcOut(pcToBranchUnit)
 );
 
 decoder dec1(
@@ -192,6 +204,30 @@ hazardDetectUnit ha1(
     .DECLocker(DEClock)
 );
 
+forward forwardBranch(
+    .addr1(DecRead1),
+    .addr2(DecRead2),
+    .preAddr_ALU_MEM(ALUWriteBackAddr), // from DEC_ALU
+    .preAddr_MEM_WB(aluMemWriteBackAddrOut), // from ALU_MEM
+    // to branch unit
+    .select1(s1B),
+    .select2(s2B)
+);
+
+branchUnit branch(
+    .pc(pcToBranchUnit),
+    .source1(RegOutData1),
+    .source2(RegOutData2),
+    .select1(s1B),
+    .select2(s2B),
+    .opcode(opcodeToControl),
+    .immValue(ImmToALU),
+    .wbALU(ALUoutData),
+    .wbALUMem(aluMemData),
+    .branchAddr(pcToPc),
+    .branchFlag(branchFlag)
+);
+
 DEC_ALU DEC_ALU1(
     // in
     .clk(clk),
@@ -223,7 +259,7 @@ DEC_ALU DEC_ALU1(
     .dataS2AddrOut(regDataAddr2)  // to forwarding unit
 );
 
-forward forwardUnit(
+forward forwardRR(
     .addr1(regDataAddr1),
     .addr2(regDataAddr2),
     .preAddr_ALU_MEM(aluMemWriteBackAddrOut), // from ALU_MEM

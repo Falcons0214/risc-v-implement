@@ -1,6 +1,6 @@
 `include "define.v"
 
-module ALUMuxUnit(
+module muxUnit(
     // from DEC_ALU
     input wire [`DataSize] dataReg,
 
@@ -91,7 +91,7 @@ module ALU(
 wire [`DataSize] r1;
 wire [`DataSize] r2;
 
-ALUMuxUnit mux1(
+muxUnit mux1(
     .dataReg(regDataFromRegS1),
     .data_ALU_MEM(regDataFromALU_MEM),
     .data_MEM_WB(regDataFromMEM_WB),
@@ -99,7 +99,7 @@ ALUMuxUnit mux1(
     .result(r1)
 );
 
-ALUMuxUnit mux2(
+muxUnit mux2(
     .dataReg(regDataFromRegS2),
     .data_ALU_MEM(regDataFromALU_MEM),
     .data_MEM_WB(regDataFromMEM_WB),

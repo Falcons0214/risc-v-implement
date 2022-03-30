@@ -14,7 +14,7 @@ module rom(
 reg [`RomUnitSize] rom[`RomSize]; // 64 unit, per unit 32 bits 
 
 always @(*) begin
-    if (flush) begin
+    if (flush === 1'b1) begin
         inst <= `DataBusReset;
     end
     else begin
