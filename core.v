@@ -10,7 +10,7 @@
 `include "dataCache.v"
 `include "MEM_WB.v"
 `include "forward.v"
-`include "hazardUnit.v"
+`include "lockerUnit.v"
 `include "branchUnit.v"
 
 module core;
@@ -49,10 +49,11 @@ wire [`ALUControlBus] ALUop;
 wire regWriteEnable;
 wire [`DataCacheControlBus] dataCCDec;
 
-// hazard dectect unit
+// locker unit
 wire PClock;
 wire IFIDlock;
 wire DEClock;
+wire CSLToDec;
 
 // register
 wire [`DataSize] RegOutData1;
@@ -68,6 +69,7 @@ wire branchFlag;
 
 // DEC_ALU
 wire ALUWriteEnable;
+wire CSLToALU;
 wire [`DataCacheControlBus] dataCCALU;
 wire [`RegAddrSize] ALUWriteBackAddr;
 wire [`DataSize] ALUData1;
@@ -87,6 +89,7 @@ wire [`DataSize] ALUoutData;
 
 // ALU_MEM
 wire aluMemWriteEnable;
+wire CSLToDataCache;
 wire [`DataCacheControlBus] dataCCMem;
 wire [`DataSize] aluMemData;
 wire [`DataSize] aluMemRs2Data;
@@ -199,9 +202,11 @@ hazardDetectUnit ha1(
     .writeBackAddr(ALUWriteBackAddr),
     .source1(DecRead1),
     .source2(DecRead2),
+    .opcodeCur(opcodeToControl),
     .PCLocker(PClock),
     .IF_IDLocker(IFIDlock),
-    .DECLocker(DEClock)
+    .DECLocker(DEClock),
+    .dataCacheWBcontrol(CSLToDec)
 );
 
 forward forwardBranch(
@@ -220,6 +225,7 @@ branchUnit branch(
     .source2(RegOutData2),
     .select1(s1B),
     .select2(s2B),
+    .opFunc3(ALUop),
     .opcode(opcodeToControl),
     .immValue(ImmToALU),
     .wbALU(ALUoutData),
@@ -245,7 +251,9 @@ DEC_ALU DEC_ALU1(
     .immValueIn(ImmToALU),
     .dataCacheControlIn(dataCCDec),
     .writeEnableReg(regWriteEnable),
-    .locker(DEClock), // from hazard detect unit
+    // from locker unit
+    .locker(DEClock),
+    .CSLToALUMEMIn(CSLToDec),
     // out
     .dataCacheControlOut(dataCCALU),
     .writeEnableAlu(ALUWriteEnable),
@@ -255,6 +263,7 @@ DEC_ALU DEC_ALU1(
     .op(opALU),
     .immValueOut(ALUimmValue),
     .opCodeToHazard(opCodeToHa), // to hazard detect unit
+    .CSLToALUMEMOut(CSLToALU),
     .dataS1AddrOut(regDataAddr1), // to forwarding unit
     .dataS2AddrOut(regDataAddr2)  // to forwarding unit
 );
@@ -290,12 +299,14 @@ ALU_MEM ALU_MEM1(
     .writeEnableIn(ALUWriteEnable),
     .writeBackAddrIn(ALUWriteBackAddr),
     .dataCacheControlIn(dataCCALU),
+    .CSLToDataCacheIn(CSLToALU),
     // out
     .dataOut(aluMemData),
     .dataRs2Out(aluMemRs2Data),
     .dataCacheControlOut(dataCCMem),
     .writeEnableOut(aluMemWriteEnable),
-    .writeBackAddrOut(aluMemWriteBackAddrOut)
+    .writeBackAddrOut(aluMemWriteBackAddrOut),
+    .CSLToDataCacheOut(CSLToDataCache)
 );
 
 ram ram1(
@@ -303,6 +314,8 @@ ram ram1(
     .addr(aluMemData),
     .dataWrite(aluMemRs2Data),
     .select(selectS),
+    .dataSelect(CSLToDataCache),
+    .preData(writeBackData),
     .dataRead(dataOut)
 );
 

@@ -54,9 +54,11 @@
 `define ADD 7'b0000000
 `define SUB 7'b0100000
 
-// R_Type Branch instruction
+// R_Type Branch instruction, using ALUControlBus (0, func3)
 `define BEQ 3'b000
 `define BNE 3'b001
+`define BEQ4 4'b0000
+`define BNE4 4'b0001
 
 // ALU control
 `define ALUopReset 4'b0000

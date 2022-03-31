@@ -7,6 +7,7 @@ module compare(
     input wire [`DataSize] pc,
     input wire [`DataSize] imm,
     input wire [`OpcodeSize] opcode,
+    input wire [`ALUControlBus] opFunc3,
     output reg [`DataSize] addrToPc,
     output reg branchFlag
 );
@@ -17,8 +18,21 @@ always @(*) begin
         branchFlag <= 1'b0;
     end
     else begin
-        if (s1 === s2) begin
-            branchFlag <= 1'b1;
+        if (opFunc3 === `BEQ4) begin
+            if(s1 ^ s2 === 32'b0) begin
+                branchFlag <= 1'b1;
+            end
+            else begin
+                branchFlag <= 1'b0;
+            end
+        end
+        else if (opFunc3 === `BNE4) begin
+            if(s1 ^ s2 !== 32'b0) begin
+                branchFlag <= 1'b1;
+            end
+            else begin
+                branchFlag <= 1'b0;
+            end
         end
         else begin
             branchFlag <= 1'b0;
@@ -45,6 +59,7 @@ module branchUnit(
     
     // from control unit
     input wire [`DataSize] immValue,
+    input wire [`ALUControlBus] opFunc3,
 
     // write back data from ALU
     input wire [`DataSize] wbALU,
@@ -84,6 +99,7 @@ compare c1(
     .pc(pc),
     .imm(immValue),
     .opcode(opcode),
+    .opFunc3(opFunc3),
     .addrToPc(branchAddr),
     .branchFlag(branchFlag)
 );

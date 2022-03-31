@@ -22,11 +22,13 @@ module DEC_ALU(
     input wire [`DataCacheControlBus] dataCacheControlIn,
     input wire [`DataSize] immValueIn,
 
-    // from hazard detect unit
+    // from locker unit
     input wire locker,
+    input wire CSLToALUMEMIn,
 
     // to ALU_MEM
     output reg writeEnableAlu,
+    output reg CSLToALUMEMOut,
     output reg [`DataCacheControlBus] dataCacheControlOut,
     output reg [`RegAddrSize] writeBackAddrOut,
 
@@ -56,6 +58,7 @@ always @(posedge clk)begin
         immValueOut <= immValueIn;
         dataS1AddrOut <= dataS1AddrIn;
         dataS2AddrOut <= dataS2AddrIn;
+        CSLToALUMEMOut <= CSLToALUMEMIn;
     end
     else begin
         writeEnableAlu <= writeEnableAlu;
@@ -67,6 +70,7 @@ always @(posedge clk)begin
         immValueOut <= immValueOut;
         dataS1AddrOut <= dataS1AddrOut;
         dataS2AddrOut <= dataS2AddrOut;
+        CSLToALUMEMOut <= CSLToALUMEMOut;
     end
 end
 

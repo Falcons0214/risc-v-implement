@@ -57,9 +57,17 @@ module controlUnit(
 always @(*) begin
     if (opcode === `Opcode_Type_B_BRANCH) begin
         immValueOut <= {{19{immValueIn[11]}}, immValueIn[11:0], 1'b0}; // LSD add 0
-        ALUop <= `ALUopReset;
         regWriteEnable <= `RegWriteDeny;
         dataCacheControl <= `DataCacheNOP;
+        if (opFunc3 === `BEQ) begin
+            ALUop <= `BEQ4;
+        end
+        else if (opFunc3 === `BNE) begin
+            ALUop <= `BNE4;
+        end
+        else begin
+            ALUop <= `ALUopReset;
+        end
     end
     else begin
         immValueOut <= {{20{immValueIn[11]}}, immValueIn[11:0]};
