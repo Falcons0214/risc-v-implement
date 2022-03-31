@@ -23,16 +23,20 @@ always @(*) begin
     readAddr1 <= inst[19:15];
     readAddr2 <= inst[24:20];
     writeAddr <= inst[11:7];
-    if (inst[6:0] == `Opcode_Type_I_Imm ||
-        inst[6:0] == `Opcode_Type_I_Load ||
-        inst[6:0] == `Opcode_Type_R_RRop) begin
+    if (inst[6:0] === `Opcode_Type_I_Imm ||
+        inst[6:0] === `Opcode_Type_I_Load ||
+        inst[6:0] === `Opcode_Type_R_RRop ||
+        inst[6:0] === `Opcode_Type_I_JALR) begin
         immValue <= inst[31:20];
     end
-    else if (inst[6:0] == `Opcode_Type_R_Store) begin
+    else if (inst[6:0] === `Opcode_Type_R_Store) begin
         immValue <= {inst[31:25], inst[11:7]};
     end
-    else if (inst[6:0] == `Opcode_Type_B_BRANCH) begin
+    else if (inst[6:0] === `Opcode_Type_B_BRANCH) begin
         immValue <= {inst[31], inst[7], inst[30:25], inst[11:8]};
+    end
+    else if (inst[6:0] === `Opcode_Type_J_JAL) begin
+        immValue <= {inst[31], inst[19:12], inst[20], inst[30:21], 1'b0};
     end
     else begin
         immValue <= `ImmReset;

@@ -29,12 +29,14 @@
 `define DataCacheWrite 2'b10
 
 // init value
-`define RegAddrReset 5'b0
 `define DataBusReset 32'b0
+`define NOP 32'b0
 
 // Instruction opcode type
 `define Opcode_Type_I_Imm 7'b0010011
 `define Opcode_Type_I_Load 7'b0000011
+`define Opcode_Type_I_JALR 7'b1100111
+`define Opcode_Type_J_JAL 7'b1101111
 `define Opcode_Type_R_Store 7'b0100011
 `define Opcode_Type_R_RRop 7'b0110011
 `define Opcode_Type_B_BRANCH 7'b1100011
@@ -60,7 +62,7 @@
 `define BEQ4 4'b0000
 `define BNE4 4'b0001
 
-// ALU control
+// ALU control 3rd bit decided operand is it immValue ?
 `define ALUopReset 4'b0000
 `define ALUop_ADDI 4'b1001
 `define ALUop_SUB 4'b0010

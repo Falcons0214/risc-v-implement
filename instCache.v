@@ -15,7 +15,7 @@ reg [`RomUnitSize] rom[`RomSize]; // 64 unit, per unit 32 bits
 
 always @(*) begin
     if (flush === 1'b1) begin
-        inst <= `DataBusReset;
+        inst <= `NOP;
     end
     else begin
         inst <= rom[addr[31:2] + 2'b00];
