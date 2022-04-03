@@ -36,6 +36,7 @@ wire [`DataSize] IF_IDdataOut;
 wire [`DataSize] pcToBranchUnit;
 
 // decoder
+wire jalCSLToDEC;
 wire [`RegAddrSize] DecRead1;
 wire [`RegAddrSize] DecRead2;
 wire [`RegAddrSize] DecWrite;
@@ -170,7 +171,8 @@ decoder dec1(
     .writeAddr(DecWrite),
     .OutOpcode(opcodeToControl),
     .OutFunc3(func3ToControl),
-    .immValue(DecImmValue)
+    .immValue(DecImmValue),
+    .jalCSL(jalCSLToDEC)
 );
 
 controlUnit control1(
@@ -225,7 +227,7 @@ branchUnit branch(
     .source2(RegOutData2),
     .select1(s1B),
     .select2(s2B),
-    .opFunc3(ALUop),
+    .op(ALUop),
     .opcode(opcodeToControl),
     .immValue(ImmToALU),
     .wbALU(ALUoutData),
@@ -238,10 +240,12 @@ DEC_ALU DEC_ALU1(
     // in
     .clk(clk),
     .reset(resetToDEC),
+    .pcFromIFID(pcToBranchUnit),
     // from register
     .dataReg1(RegOutData1),
     .dataReg2(RegOutData2),
     // from decoder
+    .jalCSL(jalCSLToDEC),
     .opCodeFromDec(opcodeToControl),
     .writeBackAddrIn(DecWrite),
     .dataS1AddrIn(DecRead1),

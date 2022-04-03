@@ -7,7 +7,7 @@ module compare(
     input wire [`DataSize] pc,
     input wire [`DataSize] imm,
     input wire [`OpcodeSize] opcode,
-    input wire [`ALUControlBus] opFunc3,
+    input wire [`ALUControlBus] op,
     output reg [`DataSize] addrToPc,
     output reg branchFlag
 );
@@ -18,7 +18,7 @@ always @(*) begin
         branchFlag <= 1'b0;
     end
     else begin
-        if (opFunc3 === `BEQ4) begin
+        if (op === `MYBEQ) begin
             if(s1 ^ s2 === 32'b0) begin
                 branchFlag <= 1'b1;
             end
@@ -26,7 +26,7 @@ always @(*) begin
                 branchFlag <= 1'b0;
             end
         end
-        else if (opFunc3 === `BNE4) begin
+        else if (op === `MYBNE) begin
             if(s1 ^ s2 !== 32'b0) begin
                 branchFlag <= 1'b1;
             end
@@ -59,7 +59,7 @@ module branchUnit(
     
     // from control unit
     input wire [`DataSize] immValue,
-    input wire [`ALUControlBus] opFunc3,
+    input wire [`ALUControlBus] op,
 
     // write back data from ALU
     input wire [`DataSize] wbALU,
@@ -77,7 +77,7 @@ module branchUnit(
 wire [`DataSize] rs1;
 wire [`DataSize] rs2;
 
-muxUnit m1(
+mux31Unit m1(
     .dataReg(source1),
     .data_ALU_MEM(wbALU), // from ALU
     .data_MEM_WB(wbALUMem), // from ALU_MEM
@@ -85,7 +85,7 @@ muxUnit m1(
     .result(rs1)
 );
 
-muxUnit m2(
+mux31Unit m2(
     .dataReg(source2),
     .data_ALU_MEM(wbALU), // from ALU
     .data_MEM_WB(wbALUMem), // from ALU_MEM
@@ -99,7 +99,7 @@ compare c1(
     .pc(pc),
     .imm(immValue),
     .opcode(opcode),
-    .opFunc3(opFunc3),
+    .op(op),
     .addrToPc(branchAddr),
     .branchFlag(branchFlag)
 );

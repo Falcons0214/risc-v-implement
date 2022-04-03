@@ -1,6 +1,6 @@
 `include "define.v"
 
-module muxUnit(
+module mux31Unit(
     // from DEC_ALU
     input wire [`DataSize] dataReg,
 
@@ -36,13 +36,29 @@ end
 
 endmodule
 
+module mux21Unit(
+    input wire [`DataSize] s1, // rs2
+    input wire [`DataSize] s2, // immValue
+    input wire select,
+    output reg [`DataSize] out
+);
+
+always @(*) begin
+    if (select === 1'b1) begin
+        out <= s2;
+    end
+    else begin
+        out <= s1;
+    end
+end
+
+endmodule
 
 module ALUComputationUnit(
     // from DEC_ALU
     input wire [`DataSize] dataSource1,
-    input wire [`DataSize] dataSource2,
-    input wire [`DataSize] immValue,
-    input wire [`ALUControlBus] op,
+    input wire [`DataSize] dataSource2, // Maybe the rs2 or immValue
+    input wire [3:0] op,
 
     // to ALU_MEM
     output reg [`DataSize] data
@@ -50,17 +66,36 @@ module ALUComputationUnit(
 
 always @(*) begin
     case (op)
-        `ALUop_ORI: begin
-            data <= dataSource1 | immValue;
+        `MYOR: begin
+            data <= dataSource1 | dataSource2;
         end
-        `ALUop_ADDI: begin
-            data <= dataSource1 + immValue;
+        `MYXOR: begin
+            data <= dataSource1 ^ dataSource2;
         end
-        `ALUop_ADD: begin
+        `MYADD: begin
             data <= dataSource1 + dataSource2;
         end
-        `ALUop_SUB: begin
+        `MYSUB: begin
             data <= dataSource1 - dataSource2;
+        end
+        `MYAND: begin
+            data <= dataSource1 & dataSource2;
+        end
+        `MYSLT: begin // 2's complement ?
+            if (dataSource1 < dataSource2) begin
+                data <= 32'b1;
+            end
+            else begin
+                data <= `DataBusReset;
+            end
+        end
+        `MYSLTU: begin
+            if (dataSource1 < dataSource2) begin
+                data <= 32'b1;
+            end
+            else begin
+                data <= `DataBusReset;
+            end
         end
         default: begin
             data <= `DataBusReset;
@@ -90,8 +125,9 @@ module ALU(
 
 wire [`DataSize] r1;
 wire [`DataSize] r2;
+wire [`DataSize] r3;
 
-muxUnit mux1(
+mux31Unit mux1(
     .dataReg(regDataFromRegS1),
     .data_ALU_MEM(regDataFromALU_MEM),
     .data_MEM_WB(regDataFromMEM_WB),
@@ -99,7 +135,7 @@ muxUnit mux1(
     .result(r1)
 );
 
-muxUnit mux2(
+mux31Unit mux2(
     .dataReg(regDataFromRegS2),
     .data_ALU_MEM(regDataFromALU_MEM),
     .data_MEM_WB(regDataFromMEM_WB),
@@ -107,11 +143,17 @@ muxUnit mux2(
     .result(r2)
 );
 
+mux21Unit mux3(
+    .s1(r2),
+    .s2(immValue),
+    .select(op[4]),
+    .out(r3)
+);
+
 ALUComputationUnit ALUcom(
     .dataSource1(r1),
-    .dataSource2(r2),
-    .immValue(immValue),
-    .op(op),
+    .dataSource2(r3),
+    .op(op[3:0]),
     .data(dataToALU_MEM)
 );
 

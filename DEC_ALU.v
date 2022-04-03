@@ -5,12 +5,14 @@ module DEC_ALU(
 
     // from IF_ID
     input wire reset,
+    input wire [`DataSize] pcFromIFID,
 
     // from register
     input wire [`DataSize] dataReg1,
     input wire [`DataSize] dataReg2,
 
     // from decoder
+    input wire jalCSL,
     input wire [`OpcodeSize] opCodeFromDec,
     input wire [`RegAddrSize] writeBackAddrIn,
     input wire [`RegAddrSize] dataS1AddrIn, 
@@ -49,10 +51,15 @@ module DEC_ALU(
 always @(posedge clk)begin
     opCodeToHazard <= opCodeFromDec;
     if(locker || reset) begin
+        if (jalCSL === 1'b1) begin
+            dataAlu1 <= pcFromIFID;
+        end
+        else begin
+            dataAlu1 <= dataReg1;
+        end
         writeEnableAlu <= writeEnableReg;
         dataCacheControlOut <= dataCacheControlIn;
         writeBackAddrOut <= writeBackAddrIn;
-        dataAlu1 <= dataReg1;
         dataAlu2 <= dataReg2;
         op <= ALUop;
         immValueOut <= immValueIn;

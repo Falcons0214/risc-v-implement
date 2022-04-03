@@ -1,7 +1,7 @@
 `include "define.v"
 
 module rom(
-    // from Hazard detect unit
+    // from branchUnit flush those instruction before branch.
     input wire flush,
     
     // from PC loader
