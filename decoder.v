@@ -57,9 +57,9 @@ module controlUnit(
     input wire [`Func3Size] opFunc3,
     input wire [`immValueBus] immValueIn,
 
-    // to Dec_ALU
-    output reg [`DataSize] immValueOut,
-    output reg [`ALUControlBus] ALUop,
+    // to Dec_ALU 
+    output reg [`DataSize] immValueOut, // to branchUnit
+    output reg [`ALUControlBus] ALUop, // to branchUnit
     output reg [`DataCacheControlBus] dataCacheControl,
     output reg regWriteEnable
 );
@@ -69,15 +69,29 @@ always @(*) begin
         immValueOut <= {{19{immValueIn[11]}}, immValueIn[11:0], 1'b0}; // LSD add 0
         regWriteEnable <= `RegWriteDeny;
         dataCacheControl <= `DataCacheNOP;
-        if (opFunc3 === `BEQ) begin
-            ALUop <= `MYBEQ;
-        end
-        else if (opFunc3 === `BNE) begin
-            ALUop <= `MYBNE;
-        end
-        else begin
-            ALUop <= `ALUopReset;
-        end
+        case (opFunc3)
+            `BEQ: begin
+                ALUop <= `MYBEQ;
+            end
+            `BNE: begin
+                ALUop <= `MYBNE;
+            end
+            `BLT: begin
+                ALUop <= `MYBLT;
+            end
+            `BGE: begin
+                ALUop <= `MYBGE;
+            end
+            `BLTU: begin
+                ALUop <= `MYBLTU;
+            end
+            `BGEU: begin
+                ALUop <= `MYBGEU;
+            end
+            default: begin
+                ALUop <= `ALUopReset;
+            end
+        endcase
     end
     else if (opcode === `Opcode_Type_J_JAL) begin
         immValueOut <= {{11{immValueIn[19]}}, immValueIn[19:0], 1'b0};

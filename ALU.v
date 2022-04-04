@@ -81,8 +81,11 @@ always @(*) begin
         `MYAND: begin
             data <= dataSource1 & dataSource2;
         end
-        `MYSLT: begin // 2's complement ?
-            if (dataSource1 < dataSource2) begin
+        `MYSLT: begin 
+            if ((dataSource1[31] === 1'b1 && dataSource2[31] === 1'b0) ||
+                (dataSource1[31] === 1'b0 && dataSource2[31] === 1'b0 && dataSource1 < dataSource2) ||
+                (dataSource1[31] === 1'b1 && dataSource2[31] === 1'b1 && dataSource1 > dataSource2))
+            begin 
                 data <= 32'b1;
             end
             else begin

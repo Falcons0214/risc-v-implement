@@ -82,8 +82,17 @@
 // R_Type Branch instruction, using ALUControlBus, ([00]->not used [000]->decide operation) 
 `define BEQ 3'b000
 `define BNE 3'b001
+`define BLT 3'b100
+`define BGE 3'b101
+`define BLTU 3'b110
+`define BGEU 3'b111
+
 `define MYBEQ 5'b00000
 `define MYBNE 5'b00001
+`define MYBLT 5'b00100
+`define MYBGE 5'b00101
+`define MYBLTU 5'b00110
+`define MYBGEU 5'b00111
 
 // ALU control ( [0]->decdie is it immValue, [0000]->operation )
 `define ALUopReset 5'b00000

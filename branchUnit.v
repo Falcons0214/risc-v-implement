@@ -19,7 +19,7 @@ always @(*) begin
     end
     else begin
         if (op === `MYBEQ) begin
-            if(s1 ^ s2 === 32'b0) begin
+            if (s1 ^ s2 === 32'b0) begin
                 branchFlag <= 1'b1;
             end
             else begin
@@ -28,6 +28,44 @@ always @(*) begin
         end
         else if (op === `MYBNE) begin
             if(s1 ^ s2 !== 32'b0) begin
+                branchFlag <= 1'b1;
+            end
+            else begin
+                branchFlag <= 1'b0;
+            end
+        end
+        else if (op === `MYBLT) begin
+            if ((s1[31] === 1'b1 && s2[31] === 1'b0) ||
+                (s1[31] === 1'b0 && s2[31] === 1'b0 && s1 < s2) ||
+                (s1[31] === 1'b1 && s2[31] === 1'b1 && s1 > s2))
+            begin 
+                branchFlag <= 1'b1;
+            end
+            else begin
+                branchFlag <= 1'b0;
+            end
+        end
+        else if (op === `MYBGE) begin
+            if ((s1[31] === 1'b0 && s2[31] === 1'b1) ||
+                (s1[31] === 1'b0 && s2[31] === 1'b0 && s1 >= s2) ||
+                (s1[31] === 1'b1 && s2[31] === 1'b1 && s1 <= s2))
+            begin 
+                branchFlag <= 1'b1;
+            end
+            else begin
+                branchFlag <= 1'b0;
+            end
+        end
+        else if (op === `MYBLTU) begin
+            if (s1 < s2) begin
+                branchFlag <= 1'b1;
+            end
+            else begin
+                branchFlag <= 1'b0;
+            end
+        end
+        else if (op === `MYBGEU) begin
+            if (s1 >= s2) begin
                 branchFlag <= 1'b1;
             end
             else begin
