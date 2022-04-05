@@ -68,8 +68,7 @@
 `define SLT 3'b010
 `define SLTU 3'b011
 `define XOR 3'b100
-`define SRL 3'b101
-`define SRA 3'b101
+`define SRLSRA 3'b101
 `define OR 3'b110
 `define AND 3'b111
 // R_Type_func7
@@ -102,11 +101,20 @@
 `define ALUop_ANDI 5'b10011
 `define ALUop_ORI 5'b10100
 `define ALUop_XORI 5'b10111
+`define ALUop_SLLI 5'b11000
+`define ALUop_SRLI 5'b11001
+`define ALUop_SRAI 5'b11010
+
 `define ALUop_XOR 5'b00111
 `define ALUop_AND 5'b00011
 `define ALUop_OR 5'b00100
 `define ALUop_SUB 5'b00010
 `define ALUop_ADD 5'b00001
+`define ALUop_SLL 5'b01000
+`define ALUop_SRL 5'b01001
+`define ALUop_SRA 5'b01010
+`define ALUop_SLT 5'b00101
+`define ALUop_SLTU 5'b00110
 
 `define MYADD 4'b0001
 `define MYSUB 4'b0010
@@ -115,6 +123,9 @@
 `define MYSLT 4'b0101
 `define MYSLTU 4'b0110
 `define MYXOR 4'b0111
+`define MYSLL 4'b1000
+`define MYSRL 4'b1001
+`define MYSRA 4'b1010
 
 // ALU 
 `define NOP 7'b0

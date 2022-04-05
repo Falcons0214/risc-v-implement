@@ -3,21 +3,20 @@
 module IF_ID(
     input wire clk,
 
-    // from Hazard detect unit
+    // from lock unit
     input wire locker,
 
     // from PC loader
     input wire resetIn,
     input wire [`DataSize] pcIn,
 
-    // from rom
+    // from inst cache
     input wire [`DataSize]dataIn,
 
-    // back to PC or Dec_ALU
-    output reg [`DataSize]addrOut,
-
-    // to Dec
+    // to Decoder
     output reg [`DataSize]dataOut,
+
+    // to DEC_ALU
     output reg resetOut,
 
     // to branchUnit

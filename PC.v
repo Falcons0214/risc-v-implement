@@ -8,7 +8,7 @@ module PC(
     input wire [`DataSize] addrIn,
     input wire [`DataSize] addrJump,
     
-    // to rom
+    // to inst cache
     output reg [`DataSize] addrOut,
 
     // to IF_ID

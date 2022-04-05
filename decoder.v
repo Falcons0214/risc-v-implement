@@ -100,7 +100,15 @@ always @(*) begin
         dataCacheControl <= `DataCacheNOP;
     end
     else begin
-        immValueOut <= {{20{immValueIn[11]}}, immValueIn[11:0]};
+        if (opFunc3 === `SLLI ||
+            opFunc3 === `SRLI ||
+            opFunc3 === `SRAI)
+        begin
+            immValueOut <= {{27{1'b0}}, immValueIn[4:0]};
+        end 
+        else begin
+            immValueOut <= {{20{immValueIn[11]}}, immValueIn[11:0]};
+        end
         case (opcode)
             `Opcode_Type_I_Imm: begin
                 case (opFunc3)
@@ -121,6 +129,15 @@ always @(*) begin
                     end
                     `ANDI: begin
                         ALUop <= `ALUop_ANDI;
+                    end
+                    `SLLI: begin
+                        ALUop <= `ALUop_SLLI;
+                    end
+                    `SRLI: begin
+                        ALUop <= `ALUop_SRLI;
+                    end
+                    `SRAI: begin
+                        ALUop <= `ALUop_SRAI;
                     end
                     default: begin
                         ALUop <= `ALUopReset;
@@ -165,8 +182,27 @@ always @(*) begin
                             end
                         endcase
                     end
+                    `SLL: begin
+                        ALUop <= `ALUop_SLL;
+                    end
+                    `SLT: begin
+                        ALUop <= `ALUop_SLT;
+                    end
+                    `SLTU: begin
+                        ALUop <= `ALUop_SLTU;
+                    end
                     `XOR: begin
                         ALUop <= `ALUop_XOR;
+                    end
+                    `SRLSRA: begin
+                        case (immValueIn[11:5])
+                            `SRL: begin
+                                ALUop <= `ALUop_SRL;
+                            end
+                            `SRA: begin
+                                ALUop <= `ALUop_SRA;
+                            end
+                        endcase
                     end
                     `OR: begin
                         ALUop <= `ALUop_OR;

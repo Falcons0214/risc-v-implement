@@ -100,6 +100,15 @@ always @(*) begin
                 data <= `DataBusReset;
             end
         end
+        `MYSLL: begin
+            data <= dataSource1 << dataSource1;
+        end
+        `MYSRL: begin
+            data <= dataSource1 >> dataSource2;
+        end
+        `MYSRA: begin
+            data <= $signed(dataSource1) >>> dataSource2;
+        end
         default: begin
             data <= `DataBusReset;
         end
