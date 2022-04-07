@@ -109,7 +109,7 @@ initial begin
 $readmemb("./data3", ram1.ram);
 $readmemb("./data2", regF1.regs);
 $readmemb("./data", rom1.rom);
-$monitor("time %4d, clock: %b, reset: %b, pcAddrOut: %b, romdataout: %b\ndecoder data1: %b, decoder data2: %b, opcode: %b\nreg file dataOut1: %b\nDEC_ALU data1: %b, locker: %b\nALU data: %b immValue: %b\nALU_MEM data: %b, wb: %b\nwrite back data: %b, addr: %b, enable: %b\nResult: %b\nReg 16: %b\nReg 17: %b\nReg 18: %b\nMEM data: %b\n", $stime, clk, pcResetIn, pcAddrOut, romDataOut, DecRead1, DecRead2, opcodeToControl, RegOutData1, ALUData1, DEClock, ALUoutData, ALUimmValue, aluMemData, aluMemWriteBackAddrOut, writeBackData, writeBackAddr, wbEnable, regF1.regs[5'b10110], regF1.regs[5'b01111], regF1.regs[5'b10000], regF1.regs[5'b10001], ram1.ram[5'b00000]);
+$monitor("time %4d, clock: %b, reset: %b, pcAddrOut: %b, romdataout: %b\ndecoder data1: %b, decoder data2: %b, opcode: %b\nreg file dataOut1: %b\nDEC_ALU data1: %b, locker: %b\nALU data: %b immValue: %b\nALU_MEM data: %b, wb: %b\nwrite back data: %b, addr: %b, enable: %b\nReg 13: %b\nReg 16: %b\nReg 17: %b\nReg 18: %b\nMEM data: %b\n", $stime, clk, pcResetIn, pcAddrOut, romDataOut, DecRead1, DecRead2, opcodeToControl, RegOutData1, ALUData1, DEClock, ALUoutData, ALUimmValue, aluMemData, aluMemWriteBackAddrOut, writeBackData, writeBackAddr, wbEnable, regF1.regs[5'b01100], regF1.regs[5'b01111], regF1.regs[5'b10000], regF1.regs[5'b10001], ram1.ram[5'b00000]);
 
 clk = 0;
 pcResetIn = 1;
@@ -121,7 +121,7 @@ flush = 0;
 #10
 pcResetIn = 0;
 
-#100 $finish; 
+#110 $finish; 
 end
 
 always begin
@@ -214,8 +214,8 @@ hazardDetectUnit ha1(
 forward forwardBranch(
     .addr1(DecRead1),
     .addr2(DecRead2),
-    .preAddr_ALU_MEM(ALUWriteBackAddr), // from DEC_ALU
-    .preAddr_MEM_WB(aluMemWriteBackAddrOut), // from ALU_MEM
+    .preAddr_ALU_MEM(aluMemWriteBackAddrOut),
+    .preAddr_MEM_WB(writeBackAddr),
     // to branch unit
     .select1(s1B),
     .select2(s2B)
@@ -230,8 +230,8 @@ branchUnit branch(
     .op(ALUop),
     .opcode(opcodeToControl),
     .immValue(ImmToALU),
-    .wbALU(ALUoutData),
     .wbALUMem(aluMemData),
+    .wbMEMWB(writeBackData),
     .branchAddr(pcToPc),
     .branchFlag(branchFlag)
 );

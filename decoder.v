@@ -70,27 +70,13 @@ always @(*) begin
         regWriteEnable <= `RegWriteDeny;
         dataCacheControl <= `DataCacheNOP;
         case (opFunc3)
-            `BEQ: begin
-                ALUop <= `MYBEQ;
-            end
-            `BNE: begin
-                ALUop <= `MYBNE;
-            end
-            `BLT: begin
-                ALUop <= `MYBLT;
-            end
-            `BGE: begin
-                ALUop <= `MYBGE;
-            end
-            `BLTU: begin
-                ALUop <= `MYBLTU;
-            end
-            `BGEU: begin
-                ALUop <= `MYBGEU;
-            end
-            default: begin
-                ALUop <= `ALUopReset;
-            end
+            `BEQ: ALUop <= `MYBEQ;
+            `BNE: ALUop <= `MYBNE;
+            `BLT: ALUop <= `MYBLT;
+            `BGE: ALUop <= `MYBGE;
+            `BLTU: ALUop <= `MYBLTU;
+            `BGEU: ALUop <= `MYBGEU;
+            default: ALUop <= `ALUopReset;
         endcase
     end
     else if (opcode === `Opcode_Type_J_JAL) begin
@@ -112,60 +98,32 @@ always @(*) begin
         case (opcode)
             `Opcode_Type_I_Imm: begin
                 case (opFunc3)
-                    `ADDI: begin
-                        ALUop <= `ALUop_ADDI;
-                    end
-                    `SLTI: begin
-                        ALUop <= `ALUop_SLTI;
-                    end
-                    `SLTIU: begin
-                        ALUop <= `ALUop_SLTIU;
-                    end
-                    `XORI: begin
-                        ALUop <= `ALUop_XORI;
-                    end
-                    `ORI: begin
-                        ALUop <= `ALUop_ORI;
-                    end
-                    `ANDI: begin
-                        ALUop <= `ALUop_ANDI;
-                    end
-                    `SLLI: begin
-                        ALUop <= `ALUop_SLLI;
-                    end
-                    `SRLI: begin
-                        ALUop <= `ALUop_SRLI;
-                    end
-                    `SRAI: begin
-                        ALUop <= `ALUop_SRAI;
-                    end
-                    default: begin
-                        ALUop <= `ALUopReset;
-                    end
+                    `ADDI: ALUop <= `ALUop_ADDI;
+                    `SLTI: ALUop <= `ALUop_SLTI;
+                    `SLTIU: ALUop <= `ALUop_SLTIU;
+                    `XORI: ALUop <= `ALUop_XORI;
+                    `ORI: ALUop <= `ALUop_ORI;
+                    `ANDI: ALUop <= `ALUop_ANDI;
+                    `SLLI: ALUop <= `ALUop_SLLI;
+                    `SRLI: ALUop <= `ALUop_SRLI;
+                    `SRAI: ALUop <= `ALUop_SRAI;
+                    default: ALUop <= `ALUopReset;
                 endcase
                 regWriteEnable <= `RegWriteAccept;
                 dataCacheControl <= `DataCacheNOP;
             end
             `Opcode_Type_I_Load: begin
                 case (opFunc3) // decide sign extend width
-                    `LW: begin // 32bit
-                        ALUop <= `ALUop_ADDI;
-                    end
-                    default: begin
-                        ALUop <= `ALUopReset;
-                    end
+                    `LW: ALUop <= `ALUop_ADDI; // 32bits
+                    default: ALUop <= `ALUopReset;
                 endcase
                 regWriteEnable <= `RegWriteAccept;
                 dataCacheControl <= `DataCacheRead;
             end
             `Opcode_Type_R_Store: begin
                 case (opFunc3) // same as Load
-                    `SW: begin // 32bits
-                        ALUop <= `ALUop_ADDI;
-                    end
-                    default: begin
-                        ALUop <= `ALUopReset;
-                    end
+                    `SW: ALUop <= `ALUop_ADDI; // 32bits
+                    default: ALUop <= `ALUopReset;
                 endcase
                 regWriteEnable <= `RegWriteDeny;
                 dataCacheControl <= `DataCacheWrite;
@@ -174,42 +132,25 @@ always @(*) begin
                 case (opFunc3)
                     `ADDSUB: begin
                         case (immValueIn[11:5])
-                            `ADD: begin
-                                ALUop <= `ALUop_ADD;
-                            end
-                            `SUB: begin
-                                ALUop <= `ALUop_SUB;
-                            end
+                            `ADD: ALUop <= `ALUop_ADD;
+                            `SUB: ALUop <= `ALUop_SUB;
+                            default: ALUop <= `ALUopReset;
                         endcase
-                    end
-                    `SLL: begin
-                        ALUop <= `ALUop_SLL;
-                    end
-                    `SLT: begin
-                        ALUop <= `ALUop_SLT;
-                    end
-                    `SLTU: begin
-                        ALUop <= `ALUop_SLTU;
-                    end
-                    `XOR: begin
-                        ALUop <= `ALUop_XOR;
                     end
                     `SRLSRA: begin
                         case (immValueIn[11:5])
-                            `SRL: begin
-                                ALUop <= `ALUop_SRL;
-                            end
-                            `SRA: begin
-                                ALUop <= `ALUop_SRA;
-                            end
+                            `SRL: ALUop <= `ALUop_SRL;
+                            `SRA: ALUop <= `ALUop_SRA;
+                            default: ALUop <= `ALUopReset;
                         endcase
                     end
-                    `OR: begin
-                        ALUop <= `ALUop_OR;
-                    end
-                    `AND: begin
-                        ALUop <= `ALUop_AND;
-                    end
+                    `SLL: ALUop <= `ALUop_SLL;
+                    `SLT: ALUop <= `ALUop_SLT;
+                    `SLTU: ALUop <= `ALUop_SLTU;
+                    `XOR: ALUop <= `ALUop_XOR;
+                    `OR: ALUop <= `ALUop_OR;
+                    `AND: ALUop <= `ALUop_AND;
+                    default: ALUop <= `ALUopReset;
                 endcase
                 regWriteEnable <= `RegWriteAccept;
                 dataCacheControl <= `DataCacheNOP;

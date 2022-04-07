@@ -37,6 +37,20 @@ always @(*) begin
             dataCacheWBcontrol <= 1'b1;
         end
     end
+    else if (opcodeCur === `Opcode_Type_B_BRANCH) begin
+        if (writeBackAddr === source1 || writeBackAddr === source2) begin
+            PCLocker <= 1'b0;
+            IF_IDLocker <= 1'b0;
+            DECLocker <= 1'b0;
+            dataCacheWBcontrol <= 1'b1;
+        end
+        else begin
+            PCLocker <= 1'b1;
+            IF_IDLocker <= 1'b1;
+            DECLocker <= 1'b1;
+            dataCacheWBcontrol <= 1'b1;
+        end
+    end
     else begin
         PCLocker <= 1'b1;
         IF_IDLocker <= 1'b1;

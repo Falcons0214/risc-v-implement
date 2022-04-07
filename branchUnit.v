@@ -99,11 +99,11 @@ module branchUnit(
     input wire [`DataSize] immValue,
     input wire [`ALUControlBus] op,
 
-    // write back data from ALU
-    input wire [`DataSize] wbALU,
-
     // write back data from ALU_MEM
     input wire [`DataSize] wbALUMem,
+
+    // write back data from WB
+    input wire [`DataSize] wbMEMWB,
 
     // to PC
     output wire [`DataSize] branchAddr,
@@ -117,16 +117,16 @@ wire [`DataSize] rs2;
 
 mux31Unit m1(
     .dataReg(source1),
-    .data_ALU_MEM(wbALU), // from ALU
-    .data_MEM_WB(wbALUMem), // from ALU_MEM
+    .data_ALU_MEM(wbALUMem), // from ALU
+    .data_MEM_WB(wbMEMWB), // from ALU_MEM
     .select(select1),
     .result(rs1)
 );
 
 mux31Unit m2(
     .dataReg(source2),
-    .data_ALU_MEM(wbALU), // from ALU
-    .data_MEM_WB(wbALUMem), // from ALU_MEM
+    .data_ALU_MEM(wbALUMem), // from ALU
+    .data_MEM_WB(wbMEMWB), // from ALU_MEM
     .select(select2),
     .result(rs2)
 );
