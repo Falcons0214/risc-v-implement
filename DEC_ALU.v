@@ -40,7 +40,8 @@ module DEC_ALU(
     output reg [`ALUControlBus] op,
     output reg [`DataSize] immValueOut,
 
-    // to hazard detect unit
+    // to lock unit
+    output reg flag,
     output reg [`OpcodeSize] opCodeToHazard,
 
     // to forwarding unit
@@ -66,6 +67,7 @@ always @(posedge clk)begin
         dataS1AddrOut <= dataS1AddrIn;
         dataS2AddrOut <= dataS2AddrIn;
         CSLToALUMEMOut <= CSLToALUMEMIn;
+        flag <= 1'b1;
     end
     else begin
         writeEnableAlu <= writeEnableAlu;
@@ -78,6 +80,7 @@ always @(posedge clk)begin
         dataS1AddrOut <= dataS1AddrOut;
         dataS2AddrOut <= dataS2AddrOut;
         CSLToALUMEMOut <= CSLToALUMEMOut;
+        flag <= 1'b0;
     end
 end
 

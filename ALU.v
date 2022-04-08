@@ -66,21 +66,14 @@ module ALUComputationUnit(
 
 always @(*) begin
     case (op)
-        `MYOR: begin
-            data <= dataSource1 | dataSource2;
-        end
-        `MYXOR: begin
-            data <= dataSource1 ^ dataSource2;
-        end
-        `MYADD: begin
-            data <= dataSource1 + dataSource2;
-        end
-        `MYSUB: begin
-            data <= dataSource1 - dataSource2;
-        end
-        `MYAND: begin
-            data <= dataSource1 & dataSource2;
-        end
+        `MYOR: data <= dataSource1 | dataSource2;
+        `MYXOR: data <= dataSource1 ^ dataSource2;
+        `MYADD: data <= dataSource1 + dataSource2;
+        `MYSUB: data <= dataSource1 - dataSource2;
+        `MYAND: data <= dataSource1 & dataSource2;
+        `MYSLL: data <= dataSource1 << dataSource2;
+        `MYSRL: data <= dataSource1 >> dataSource2;
+        `MYSRA: data <= $signed(dataSource1) >>> dataSource2;
         `MYSLT: begin 
             if ((dataSource1[31] === 1'b1 && dataSource2[31] === 1'b0) ||
                 (dataSource1[31] === 1'b0 && dataSource2[31] === 1'b0 && dataSource1 < dataSource2) ||
@@ -100,18 +93,7 @@ always @(*) begin
                 data <= `DataBusReset;
             end
         end
-        `MYSLL: begin
-            data <= dataSource1 << dataSource1;
-        end
-        `MYSRL: begin
-            data <= dataSource1 >> dataSource2;
-        end
-        `MYSRA: begin
-            data <= $signed(dataSource1) >>> dataSource2;
-        end
-        default: begin
-            data <= `DataBusReset;
-        end
+        default: data <= `DataBusReset;
     endcase
 end
 

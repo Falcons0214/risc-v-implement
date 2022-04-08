@@ -69,6 +69,7 @@ wire [`DataSize] pcToPc;
 wire branchFlag;
 
 // DEC_ALU
+wire flagToLock;
 wire ALUWriteEnable;
 wire CSLToALU;
 wire [`DataCacheControlBus] dataCCALU;
@@ -121,7 +122,7 @@ flush = 0;
 #10
 pcResetIn = 0;
 
-#110 $finish; 
+#130 $finish; 
 end
 
 always begin
@@ -200,6 +201,7 @@ register regF1(
 );
 
 hazardDetectUnit ha1(
+    .flag(flagToLock),
     .opCodeFromDec(opCodeToHa),
     .writeBackAddr(ALUWriteBackAddr),
     .source1(DecRead1),
@@ -259,6 +261,7 @@ DEC_ALU DEC_ALU1(
     .locker(DEClock),
     .CSLToALUMEMIn(CSLToDec),
     // out
+    .flag(flagToLock),
     .dataCacheControlOut(dataCCALU),
     .writeEnableAlu(ALUWriteEnable),
     .writeBackAddrOut(ALUWriteBackAddr),

@@ -21,7 +21,7 @@ always @(posedge clk) begin
         addrOut <= `DataBusReset;
     end
     else begin
-        if (locker != 0) begin
+        if (locker !== 1'b0) begin
             if (select) begin
                 addrOut <= addrJump;
             end

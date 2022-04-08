@@ -19,7 +19,7 @@ always @(*) begin
     end
     else begin
         if (op === `MYBEQ) begin
-            if (s1 ^ s2 === 32'b0) begin
+            if (s1 === s2) begin
                 branchFlag <= 1'b1;
             end
             else begin
@@ -27,7 +27,7 @@ always @(*) begin
             end
         end
         else if (op === `MYBNE) begin
-            if(s1 ^ s2 !== 32'b0) begin
+            if (s1 !== s2) begin
                 branchFlag <= 1'b1;
             end
             else begin

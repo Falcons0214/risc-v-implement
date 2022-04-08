@@ -4,6 +4,7 @@ module hazardDetectUnit(
     // from DEC_ALU
     input wire [`OpcodeSize] opCodeFromDec,
     input wire [`RegAddrSize] writeBackAddr,
+    input wire flag,
 
     // from decoder
     input wire [`RegAddrSize] source1,
@@ -38,7 +39,7 @@ always @(*) begin
         end
     end
     else if (opcodeCur === `Opcode_Type_B_BRANCH) begin
-        if (writeBackAddr === source1 || writeBackAddr === source2) begin
+        if (flag === 1'b1 && (writeBackAddr === source1 || writeBackAddr === source2)) begin
             PCLocker <= 1'b0;
             IF_IDLocker <= 1'b0;
             DECLocker <= 1'b0;
