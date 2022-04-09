@@ -5,6 +5,7 @@ module IF_ID(
 
     // from lock unit
     input wire locker,
+    input wire ALUForwardCSLFromLockIn,
 
     // from PC loader
     input wire resetIn,
@@ -18,6 +19,7 @@ module IF_ID(
 
     // to DEC_ALU
     output reg resetOut,
+    output reg ALUForwardCSLFromLockOut,
 
     // to branchUnit
     output reg [`DataSize] pcOut
@@ -26,6 +28,7 @@ module IF_ID(
 always @(posedge clk) begin
     resetOut <= resetIn;
     pcOut <= pcIn;
+    ALUForwardCSLFromLockOut <= ALUForwardCSLFromLockIn;
     if (locker || resetIn) begin
         dataOut <= dataIn;
     end

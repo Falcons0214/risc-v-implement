@@ -34,6 +34,7 @@ wire resetToDEC;
 wire [`DataSize] IF_IDromAddrOut;
 wire [`DataSize] IF_IDdataOut;
 wire [`DataSize] pcToBranchUnit;
+wire ALUForCSLToDEC;
 
 // decoder
 wire jalCSLToDEC;
@@ -55,6 +56,7 @@ wire PClock;
 wire IFIDlock;
 wire DEClock;
 wire CSLToDec;
+wire ALUForCSLToIFID;
 
 // register
 wire [`DataSize] RegOutData1;
@@ -72,6 +74,7 @@ wire branchFlag;
 wire flagToLock;
 wire ALUWriteEnable;
 wire CSLToALU;
+wire ALUForCSLToForRR;
 wire [`DataCacheControlBus] dataCCALU;
 wire [`RegAddrSize] ALUWriteBackAddr;
 wire [`DataSize] ALUData1;
@@ -110,7 +113,7 @@ initial begin
 $readmemb("./data3", ram1.ram);
 $readmemb("./data2", regF1.regs);
 $readmemb("./data", rom1.rom);
-$monitor("time %4d, clock: %b, reset: %b, pcAddrOut: %b, romdataout: %b\ndecoder data1: %b, decoder data2: %b, opcode: %b\nreg file dataOut1: %b\nDEC_ALU data1: %b, locker: %b\nALU data: %b immValue: %b\nALU_MEM data: %b, wb: %b\nwrite back data: %b, addr: %b, enable: %b\nReg 13: %b\nReg 16: %b\nReg 17: %b\nReg 18: %b\nMEM data: %b\n", $stime, clk, pcResetIn, pcAddrOut, romDataOut, DecRead1, DecRead2, opcodeToControl, RegOutData1, ALUData1, DEClock, ALUoutData, ALUimmValue, aluMemData, aluMemWriteBackAddrOut, writeBackData, writeBackAddr, wbEnable, regF1.regs[5'b01100], regF1.regs[5'b01111], regF1.regs[5'b10000], regF1.regs[5'b10001], ram1.ram[5'b00000]);
+$monitor("time %4d, clock: %b, reset: %b, pcAddrOut: %b, romdataout: %b\ndecoder data1: %b, decoder data2: %b, opcode: %b\nreg file dataOut1: %b\nDEC_ALU data1: %b, locker: %b\nALU data: %b immValue: %b\nALU_MEM data: %b, wb: %b\nwrite back data: %b, addr: %b, enable: %b\nReg 6: %b\nReg 5: %b\nReg 17: %b\nReg 18: %b\nMEM data: %b\n", $stime, clk, pcResetIn, pcAddrOut, romDataOut, DecRead1, DecRead2, opcodeToControl, RegOutData1, ALUData1, DEClock, ALUoutData, ALUimmValue, aluMemData, aluMemWriteBackAddrOut, writeBackData, writeBackAddr, wbEnable, regF1.regs[5'b00101], regF1.regs[5'b00100], regF1.regs[5'b10000], regF1.regs[5'b10001], ram1.ram[5'b00000]);
 
 clk = 0;
 pcResetIn = 1;
@@ -154,13 +157,15 @@ IF_ID ifid1(
     // in
     .clk(clk),
     .locker(IFIDlock),
+    .ALUForwardCSLFromLockIn(ALUForCSLToIFID),
     .resetIn(resetToIFID),
     .pcIn(pcAddrOut),
     .dataIn(romDataOut),
     // out
     .dataOut(IF_IDdataOut),
     .resetOut(resetToDEC),
-    .pcOut(pcToBranchUnit)
+    .pcOut(pcToBranchUnit),
+    .ALUForwardCSLFromLockOut(ALUForCSLToDEC)
 );
 
 decoder dec1(
@@ -209,11 +214,13 @@ hazardDetectUnit ha1(
     .opcodeCur(opcodeToControl),
     .PCLocker(PClock),
     .IF_IDLocker(IFIDlock),
+    .ALUForwardControl(ALUForCSLToIFID),
     .DECLocker(DEClock),
     .dataCacheWBcontrol(CSLToDec)
 );
 
 forward forwardBranch(
+    .isLW(1'b1),
     .addr1(DecRead1),
     .addr2(DecRead2),
     .preAddr_ALU_MEM(aluMemWriteBackAddrOut),
@@ -241,8 +248,10 @@ branchUnit branch(
 DEC_ALU DEC_ALU1(
     // in
     .clk(clk),
+    // from IF_ID
     .reset(resetToDEC),
     .pcFromIFID(pcToBranchUnit),
+    .ALUForwardCSLIn(ALUForCSLToDEC),
     // from register
     .dataReg1(RegOutData1),
     .dataReg2(RegOutData2),
@@ -271,11 +280,14 @@ DEC_ALU DEC_ALU1(
     .immValueOut(ALUimmValue),
     .opCodeToHazard(opCodeToHa), // to hazard detect unit
     .CSLToALUMEMOut(CSLToALU),
-    .dataS1AddrOut(regDataAddr1), // to forwarding unit
-    .dataS2AddrOut(regDataAddr2)  // to forwarding unit
+    // to forwarding unit
+    .ALUForwardCSLOut(ALUForCSLToForRR),
+    .dataS1AddrOut(regDataAddr1), 
+    .dataS2AddrOut(regDataAddr2)
 );
 
 forward forwardRR(
+    .isLW(ALUForCSLToForRR),
     .addr1(regDataAddr1),
     .addr2(regDataAddr2),
     .preAddr_ALU_MEM(aluMemWriteBackAddrOut), // from ALU_MEM

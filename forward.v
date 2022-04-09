@@ -2,6 +2,7 @@
 
 module forward(
     // from DC_ALU
+    input wire isLW,
     input wire [`RegAddrSize] addr1,
     input wire [`RegAddrSize] addr2,
     
@@ -16,7 +17,7 @@ module forward(
 );
 
 always @(*) begin
-    if (addr1 === preAddr_ALU_MEM) begin
+    if (addr1 === preAddr_ALU_MEM && isLW) begin // LW & ADD have problem
         select1 <= `ALUMuxDataFromALU_MEM;
     end
     else if (addr1 === preAddr_MEM_WB) begin
@@ -25,7 +26,7 @@ always @(*) begin
     else begin
         select1 <= `ALUMuxDataFromReg;
     end
-    if (addr2 === preAddr_ALU_MEM) begin
+    if (addr2 === preAddr_ALU_MEM && isLW) begin
         select2 <= `ALUMuxDataFromALU_MEM;
     end
     else if (addr2 === preAddr_MEM_WB) begin

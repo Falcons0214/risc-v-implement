@@ -6,6 +6,7 @@ module DEC_ALU(
     // from IF_ID
     input wire reset,
     input wire [`DataSize] pcFromIFID,
+    input wire ALUForwardCSLIn,
 
     // from register
     input wire [`DataSize] dataReg1,
@@ -45,12 +46,14 @@ module DEC_ALU(
     output reg [`OpcodeSize] opCodeToHazard,
 
     // to forwarding unit
+    output reg ALUForwardCSLOut,
     output reg [`RegAddrSize] dataS1AddrOut,
     output reg [`RegAddrSize] dataS2AddrOut
 );
 
 always @(posedge clk)begin
     opCodeToHazard <= opCodeFromDec;
+    ALUForwardCSLOut <= ALUForwardCSLIn;
     if(locker || reset) begin
         if (jalCSL === 1'b1) begin
             dataAlu1 <= pcFromIFID;

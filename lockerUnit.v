@@ -14,6 +14,7 @@ module hazardDetectUnit(
     output reg PCLocker,
     output reg IF_IDLocker,
     output reg DECLocker,
+    output reg ALUForwardControl, // for computation befroe LW, to IF_ID
     output reg dataCacheWBcontrol // to DEC_ALU 
 );
 
@@ -24,21 +25,25 @@ always @(*) begin
             IF_IDLocker <= 1'b1;
             DECLocker <= 1'b1;
             dataCacheWBcontrol <= 1'b0;
+            ALUForwardControl <= 1'b1;
         end
         else if (source1 === writeBackAddr || source2 === writeBackAddr) begin
             IF_IDLocker <= 1'b0;
             PCLocker <= 1'b0;
             DECLocker <= 1'b0;
             dataCacheWBcontrol <= 1'b1;
+            ALUForwardControl <= 1'b0;
         end
         else begin
             PCLocker <= 1'b1;
             IF_IDLocker <= 1'b1;
             DECLocker <= 1'b1;
             dataCacheWBcontrol <= 1'b1;
+            ALUForwardControl <= 1'b1;
         end
     end
     else if (opcodeCur === `Opcode_Type_B_BRANCH) begin
+        ALUForwardControl <= 1'b1;
         if (flag === 1'b1 && (writeBackAddr === source1 || writeBackAddr === source2)) begin
             PCLocker <= 1'b0;
             IF_IDLocker <= 1'b0;
@@ -57,6 +62,7 @@ always @(*) begin
         IF_IDLocker <= 1'b1;
         DECLocker <= 1'b1;
         dataCacheWBcontrol <= 1'b1;
+        ALUForwardControl <= 1'b1;
     end
 end
 
