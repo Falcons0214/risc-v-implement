@@ -57,6 +57,8 @@ wire IFIDlock;
 wire DEClock;
 wire CSLToDec;
 wire ALUForCSLToIFID;
+wire branchForCSLToMEM;
+wire selectToIFID;
 
 // register
 wire [`DataSize] RegOutData1;
@@ -106,6 +108,8 @@ wire [`DataSize] dataOut;
 
 // MEM_WB
 wire wbEnable;
+wire isLWDoneToLock;
+wire branchForBackToFor;
 wire [`DataSize] writeBackData;
 wire [`RegAddrSize] writeBackAddr;
 
@@ -113,7 +117,7 @@ initial begin
 $readmemb("./data3", ram1.ram);
 $readmemb("./data2", regF1.regs);
 $readmemb("./data", rom1.rom);
-$monitor("time %4d, clock: %b, reset: %b, pcAddrOut: %b, romdataout: %b\ndecoder data1: %b, decoder data2: %b, opcode: %b\nreg file dataOut1: %b\nDEC_ALU data1: %b, locker: %b\nALU data: %b immValue: %b\nALU_MEM data: %b, wb: %b\nwrite back data: %b, addr: %b, enable: %b\nReg 6: %b\nReg 5: %b\nReg 17: %b\nReg 18: %b\nMEM data: %b\n", $stime, clk, pcResetIn, pcAddrOut, romDataOut, DecRead1, DecRead2, opcodeToControl, RegOutData1, ALUData1, DEClock, ALUoutData, ALUimmValue, aluMemData, aluMemWriteBackAddrOut, writeBackData, writeBackAddr, wbEnable, regF1.regs[5'b00101], regF1.regs[5'b00100], regF1.regs[5'b10000], regF1.regs[5'b10001], ram1.ram[5'b00000]);
+$monitor("time %4d, clock: %b, reset: %b, pcAddrOut: %b, romdataout: %b\ndecoder data1: %b, decoder data2: %b, opcode: %b\nreg file dataOut1: %b\nDEC_ALU data1: %b, locker: %b\nALU data: %b immValue: %b\nALU_MEM data: %b, wb: %b\nwrite back data: %b, addr: %b, enable: %b\nReg 28: %b\nReg 27: %b\nReg 17: %b\nReg 18: %b\nMEM data: %b\n", $stime, clk, pcResetIn, pcAddrOut, romDataOut, DecRead1, DecRead2, opcodeToControl, RegOutData1, ALUData1, DEClock, ALUoutData, ALUimmValue, aluMemData, aluMemWriteBackAddrOut, writeBackData, writeBackAddr, wbEnable, regF1.regs[5'b11011], regF1.regs[5'b11010], regF1.regs[5'b10000], regF1.regs[5'b10001], ram1.ram[5'b00000]);
 
 clk = 0;
 pcResetIn = 1;
@@ -158,6 +162,8 @@ IF_ID ifid1(
     .clk(clk),
     .locker(IFIDlock),
     .ALUForwardCSLFromLockIn(ALUForCSLToIFID),
+    .select(selectToIFID),
+    .nextInst(IF_IDdataOut),
     .resetIn(resetToIFID),
     .pcIn(pcAddrOut),
     .dataIn(romDataOut),
@@ -212,15 +218,18 @@ hazardDetectUnit ha1(
     .source1(DecRead1),
     .source2(DecRead2),
     .opcodeCur(opcodeToControl),
+    .isLWDone(isLWDoneToLock),
     .PCLocker(PClock),
     .IF_IDLocker(IFIDlock),
     .ALUForwardControl(ALUForCSLToIFID),
+    .select(selectToIFID),
     .DECLocker(DEClock),
-    .dataCacheWBcontrol(CSLToDec)
+    .dataCacheWBcontrol(CSLToDec),
+    .branchForwardCSL(branchForCSLToMEM)
 );
 
 forward forwardBranch(
-    .isLW(1'b1),
+    .isLW(branchForBackToFor),
     .addr1(DecRead1),
     .addr2(DecRead2),
     .preAddr_ALU_MEM(aluMemWriteBackAddrOut),
@@ -345,11 +354,15 @@ MEM_WB MEM_WB1(
     .dataFromALU(aluMemData),
     .dataFromRam(dataOut),
     .regWriteEnableIn(aluMemWriteEnable),
+    .branchForCSLIn(branchForCSLToMEM),
     .writeBackAddrIn(aluMemWriteBackAddrOut),
+    .isLW(dataCCMem),
     // out
+    .CSLToLock(isLWDoneToLock),
     .regWriteEnableOut(wbEnable),
     .writeBackAddrOut(writeBackAddr),
-    .dataToReg(writeBackData)
+    .dataToReg(writeBackData),
+    .branchForCSLOut(branchForBackToFor)
 );
 
 endmodule

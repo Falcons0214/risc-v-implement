@@ -5,12 +5,20 @@ module MEM_WB(
 
     // from ram
     input wire select,
-    input wire [`DataSize]dataFromRam,
+    input wire [`DataSize] dataFromRam,
 
     // from ALU_MEM
     input wire regWriteEnableIn,
-    input wire [`DataSize]dataFromALU,
+    input wire branchForCSLIn,
+    input wire [`DataSize] dataFromALU,
     input wire [`RegAddrSize] writeBackAddrIn,
+    input wire [`DataCacheControlBus] isLW,
+
+    // to Lock unit
+    output reg CSLToLock,
+
+    // to Branch Forward
+    output reg branchForCSLOut, 
 
     // to register file
     output reg regWriteEnableOut,
@@ -21,7 +29,14 @@ module MEM_WB(
 always @(posedge clk) begin
     regWriteEnableOut <= regWriteEnableIn;
     writeBackAddrOut <= writeBackAddrIn;
-    if(select) begin
+    branchForCSLOut <= branchForCSLIn;
+    if (isLW === `DataCacheRead) begin
+        CSLToLock <= 1'b0;
+    end
+    else begin
+        CSLToLock <= 1'b1;
+    end
+    if (select) begin
         dataToReg <= dataFromRam;
     end 
     else begin
